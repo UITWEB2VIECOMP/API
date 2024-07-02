@@ -32,7 +32,6 @@ exports.login = async(req, res)=>{
     }
     try{
         const [emailCheck] = await db.query('SELECT email, password_hash ,user_id , role_id FROM users WHERE email = ?', [email]);
-        console.log(emailCheck);
         if(emailCheck.length === 0 || !await bcrypt.compare(password, emailCheck[0].password_hash)){
             return res.status(400).json({status: "error", message: "email or password is incorrect"}) 
         }
