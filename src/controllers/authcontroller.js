@@ -1,8 +1,9 @@
 const db = require('../../database')
 const bcrypt = require('bcrypt')
+const sendEmail = require('./sendEmail');
 const mysql = require('mysql2')
 const crypto = require('crypto');
-const { Router } = require('express');
+
 exports.register = async(req, res)=>{
     const {firstname, lastname,DOB, email, password, passwordConfirm} = req.body
     try{
@@ -18,11 +19,11 @@ exports.register = async(req, res)=>{
         const [insertUser] = await db.query('INSERT INTO users SET ?', { email: email, password_hash: hashedPassword, role_id: roleID });
         const userID = insertUser.insertId;
         const [insertParticipant] = await db.query('INSERT INTO Participants SET ?', { user_id: userID, first_name: firstname, last_name: lastname, dob: DOB });
+        const token_value = crypto.randomBytes(32).toString("hex")
+        const [token] = await db.query('INSERT INTO tokens SET ?',{user_id: userID, token: token_value})
 
-        const [token] = await db.query('INSERT INTO tokens SET ',{user_id: userID, token: crypto.randomBytes(32).toString("hex")})
-
-        const url = `${process.env.VERIFY_BASE_URL}users/${userID}/verify/${token[0].token}`
-        await sendMail(email, "Verify email", url)
+        const url = `${process.env.VERIFY_BASE_URL}users/${userID}/verify/${token_value}`
+        await sendEmail(email, "Verify email", url)
 
         return res.status(200).json({ status: "success",message: 'An email send to your account please verify' });
     }catch (error) {
