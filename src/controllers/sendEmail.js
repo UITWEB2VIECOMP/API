@@ -17,7 +17,7 @@ module.exports = async(email, subject, content)=>{
             from: process.env.VERIFY_USER,
             to: email,
             subject: subject,
-            content: content
+            text: content
         })
         console.log("Email send successfully");
 

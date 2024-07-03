@@ -18,11 +18,11 @@ exports.register = async(req, res)=>{
         const roleID = roles[0].role_id;
         const [insertUser] = await db.query('INSERT INTO users SET ?', { email: email, password_hash: hashedPassword, role_id: roleID });
         const userID = insertUser.insertId;
-        const [insertParticipant] = await db.query('INSERT INTO Participants SET ?', { user_id: userID, first_name: firstname, last_name: lastname, dob: DOB });
+        await db.query('INSERT INTO Participants SET ?', { user_id: userID, first_name: firstname, last_name: lastname, dob: DOB });
         const token_value = crypto.randomBytes(32).toString("hex")
-        const [token] = await db.query('INSERT INTO tokens SET ?',{user_id: userID, token: token_value})
+        await db.query('INSERT INTO tokens SET ?',{user_id: userID, token: token_value})
 
-        const url = `${process.env.VERIFY_BASE_URL}users/${userID}/verify/${token_value}`
+        const url = `${process.env.VERIFY_BASE_URL}auth/${userID}/verify/${token_value}`
         await sendEmail(email, "Verify email", url)
 
         return res.status(200).json({ status: "success",message: 'An email send to your account please verify' });
@@ -52,6 +52,33 @@ exports.verify = async(req,res)=>{
     }
 }
 
+exports.resend = async(req, res)=>{
+    const { email } = req.body;
+    try{
+        const [emailCheck] = await db.query('SELECT user_id, verified FROM users WHERE email = ?', [email]);
+
+        if (emailCheck.length === 0) {
+            return res.status(404).json({ status: "error", message: "User not found" });
+        }
+        if (emailCheck[0].verified) {
+            return res.status(400).json({ status: "error", message: "Email is already verified" });
+        }
+        const [tokenCheck] = await db.query('SELECT token FROM tokens WHERE user_id = ?', [emailCheck[0].user_id]);
+        if (tokenCheck.length === 0) {
+            const token_value = crypto.randomBytes(32).toString("hex")
+            await db.query('INSERT INTO tokens SET ?',{user_id: emailCheck[0].user_id, token: token_value})
+            const url = `${process.env.VERIFY_BASE_URL}auth/${emailCheck[0].user_id}/verify/${token_value}`
+            await sendEmail(emailCheck[0].email, "Verify email", url)
+        }
+        const url = `${process.env.VERIFY_BASE_URL}auth/${emailCheck[0].user_id}/verify/${tokenCheck[0].token}`;
+        await sendEmail(email, "Verify email", url);
+        return res.status(200).json({ status: "success", message: "Verification email resented" });
+
+    }catch (error) {
+        console.error(error);
+        return res.status(500).json({status: "error", message: 'Internal server error' });
+    }
+}
 
 exports.login = async(req, res)=>{
     const {email, password} = req.body
@@ -63,13 +90,16 @@ exports.login = async(req, res)=>{
         if(emailCheck.length === 0 || !await bcrypt.compare(password, emailCheck[0].password_hash)){
             return res.status(400).json({status: "error", message: "email or password is incorrect"}) 
         }
-        if(!Number(emailCheck[0].verified)){
-            const [token] = await db.query('SELECT token FROM tokens WHERE user_id = ? AND token=?', [id, token])
-            if(tokenCheck.length === 0){    
-                const url = `${process.env.VERIFY_BASE_URL}users/${userID}/verify/${token[0].token}`
-                await sendMail(emailCheck[0].email, "Verify email", url)
-                return res.status(400).json({status:"error",message:"An email is sent to your account please check"})
+        console.log(emailCheck[0].verified);
+        if(!emailCheck[0].verified){
+            const [tokenCheck] = await db.query('SELECT token FROM tokens WHERE user_id = ?', [emailCheck[0].user_id])
+            if(tokenCheck.length === 0){   
+                const token_value = crypto.randomBytes(32).toString("hex")
+                await db.query('INSERT INTO tokens SET ?',{user_id: userID, token: token_value})
+                const url = `${process.env.VERIFY_BASE_URL}auth/${userID}/verify/${token_value}`
+                await sendEmail(emailCheck[0].email, "Verify email", url)
             }
+            return res.status(400).json({status:"error",message:"An email is sent to your account please check"})
         }
         let [role] = await db.query('SELECT role_name FROM roles WHERE role_id = ?', [emailCheck[0].role_id]);
         return res.status(200).send({status:'success', data:{user_id: emailCheck[0].user_id, role: role[0].role_name}})
