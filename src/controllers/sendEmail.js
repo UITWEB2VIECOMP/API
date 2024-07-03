@@ -1,6 +1,5 @@
 const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
-const { text } = require('express');
 dotenv.config()
 module.exports = async(email, subject, content)=>{
     try{
