@@ -21,7 +21,7 @@ exports.register = async(req, res)=>{
         await db.query('INSERT INTO Participants SET ?', { user_id: userID, first_name: firstname, last_name: lastname, dob: DOB });
 
         const token_value = crypto.randomBytes(32).toString("hex")
-        const expireDate = new Date(Date.now() + 3600000);
+        const expireDate = new Date(Date.now() + (60*60*1000));
         await db.query('INSERT INTO tokens SET ?',{user_id: userID, token: token_value,token_type: "emailverify", expires_at: expireDate })
 
         const url = `${process.env.VERIFY_BASE_URL}auth/${userID}/verify/${token_value}`
@@ -59,7 +59,7 @@ exports.resend = async(req, res)=>{
     const { email } = req.body;
     try{
         await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
-        const [emailCheck] = await db.query('SELECT user_id, verified FROM users WHERE email = ?', [email]);
+        const [emailCheck] = await db.query('SELECT user_id,email, verified FROM users WHERE email = ?', [email]);
 
         if (emailCheck.length === 0) {
             return res.status(404).json({ status: "error", message: "User not found" });
@@ -70,13 +70,14 @@ exports.resend = async(req, res)=>{
         const [tokenCheck] = await db.query('SELECT token FROM tokens WHERE user_id = ? AND token_type = ?', [emailCheck[0].user_id, "emailverify"]);
         if (tokenCheck.length === 0) {
             const token_value = crypto.randomBytes(32).toString("hex")
-            const expireDate = new Date(Date.now() + 3600000);
+            const expireDate = new Date(Date.now() + (60*60*1000));
             await db.query('INSERT INTO tokens SET ? ',{user_id: emailCheck[0].user_id, token: token_value,token_type: "emailverify", expires_at: expireDate})
             const url = `${process.env.VERIFY_BASE_URL}auth/${emailCheck[0].user_id}/verify/${token_value}`
             await sendEmail(emailCheck[0].email, "Verify email", url)
+        }else{
+            const url = `${process.env.VERIFY_BASE_URL}auth/${emailCheck[0].user_id}/verify/${tokenCheck[0].token}`;
+            await sendEmail(email, "Verify email", url);
         }
-        const url = `${process.env.VERIFY_BASE_URL}auth/${emailCheck[0].user_id}/verify/${tokenCheck[0].token}`;
-        await sendEmail(email, "Verify email", url);
         return res.status(200).json({ status: "success", message: "Verification email resented" });
 
     }catch (error) {
