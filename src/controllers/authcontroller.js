@@ -89,17 +89,25 @@ exports.resend = async(req, res)=>{
 exports.forgetpassword = async(req, res)=>{
     const {email} = req.body
     try{
+        await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
         const [emailCheck] = await db.query('SELECT email, password_hash ,user_id , role_id, verified FROM users WHERE email = ?', [email]);
         if(emailCheck.length === 0){
             return res.status(400).json({status: "error", message: "email is not exist"}) 
         }
         const expireDate = new Date(Date.now() + (60*60*1000));
-        const token = crypto.randomBytes(32).toString('hex');
-        await db.query('INSERT INTO tokens SET ?',{user_id: emailCheck[0].user_id, token: token,token_type: "resetpassword", expires_at: expireDate })
-
-        const url = `${process.env.VERIFY_BASE_URL}auth/${emailCheck[0].user_id}/verify/${token}`;
-        await sendEmail(emailCheck[0].user_id, "Reset Password email",url)
-        return res.status(200).json({status: success, msg:'reset password link is send to your mail'})
+        const [tokenCheck] = await db.query('SELECT token FROM tokens WHERE user_id = ? AND token_type = ? ', [emailCheck[0].user_id, "resetpassword"]);
+        console.log(tokenCheck);
+        var url = ''
+        if(tokenCheck.length === 0){
+            const token = crypto.randomBytes(32).toString('hex');
+            await db.query('INSERT INTO tokens SET ?',{user_id: emailCheck[0].user_id, token: token,token_type: "resetpassword", expires_at: expireDate }) 
+            url = `${process.env.VERIFY_BASE_URL}auth/${emailCheck[0].user_id}/resetpassword/${token}`;
+        }
+        else{
+            url = `${process.env.VERIFY_BASE_URL}auth/${emailCheck[0].user_id}/resetpassword/${tokenCheck[0].token}`;
+        }
+        await sendEmail(emailCheck[0].email, "Reset Password email",url)
+        return res.status(200).json({status: "success", msg:'reset password link is send to your mail'})
     }catch (error) {
         console.error(error);
         return res.status(500).json({status: "error", message: 'Internal server error' });
