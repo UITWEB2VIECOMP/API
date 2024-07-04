@@ -90,24 +90,44 @@ exports.forgetpassword = async(req, res)=>{
     const {email} = req.body
     try{
         await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
-        const [emailCheck] = await db.query('SELECT email, password_hash ,user_id , role_id, verified FROM users WHERE email = ?', [email]);
+        const [emailCheck] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
         if(emailCheck.length === 0){
             return res.status(400).json({status: "error", message: "email is not exist"}) 
         }
         const expireDate = new Date(Date.now() + (60*60*1000));
-        const [tokenCheck] = await db.query('SELECT token FROM tokens WHERE user_id = ? AND token_type = ? ', [emailCheck[0].user_id, "resetpassword"]);
+        const [tokenCheck] = await db.query('SELECT token FROM tokens WHERE user_id = ? AND token_type = ?', [emailCheck[0].user_id, "resetpassword"]);
         console.log(tokenCheck);
         var url = ''
-        if(tokenCheck.length === 0){
-            const token = crypto.randomBytes(32).toString('hex');
-            await db.query('INSERT INTO tokens SET ?',{user_id: emailCheck[0].user_id, token: token,token_type: "resetpassword", expires_at: expireDate }) 
-            url = `${process.env.VERIFY_BASE_URL}auth/${emailCheck[0].user_id}/resetpassword/${token}`;
+        
+        if(tokenCheck.length !== 0){
+            await db.query('DELETE FROM tokens WHERE user_id = ? AND token_type = ? ', [emailCheck[0].user_id,"resetpassword"]);
         }
-        else{
-            url = `${process.env.VERIFY_BASE_URL}auth/${emailCheck[0].user_id}/resetpassword/${tokenCheck[0].token}`;
-        }
+        const token = crypto.randomBytes(32).toString('hex');
+        await db.query('INSERT INTO tokens SET ?',{user_id: emailCheck[0].user_id, token: token,token_type: "resetpassword", expires_at: expireDate }) 
+        url = `${process.env.VERIFY_BASE_URL}auth/${emailCheck[0].user_id}/resetpassword/${token}`;        
         await sendEmail(emailCheck[0].email, "Reset Password email",url)
         return res.status(200).json({status: "success", msg:'reset password link is send to your mail'})
+    }catch (error) {
+        console.error(error);
+        return res.status(500).json({status: "error", message: 'Internal server error' });
+    }
+}
+
+exports.resetpassword_check = async(req, res)=>{
+    const {id, token } = req.params
+    try{
+        await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
+        const [checkID] = db.query('SELECT * FROM users WHERE user_id = ?',[id])
+        if(checkID === 0){
+            return res.status(400).json({status:"error", message: "User is not found"})
+        }
+        const [checkToken] = db.query('SELECT * FROM tokens WHERE user_id = ? AND token = ? AND token_type = ?',[id, token, "resetpassword"])
+        if(checkToken === 0){
+            return res.status(400).json({status:"error", message: "Link is invalid or expired"})
+        }
+        await db.query('DELETE FROM tokens WHERE user_id = ? AND token = ? AND token_type = ?',[id,token, 'resetpassword'])
+        
+        return res.status(200).json({status:"success", message:"Link is valid"})
     }catch (error) {
         console.error(error);
         return res.status(500).json({status: "error", message: 'Internal server error' });
