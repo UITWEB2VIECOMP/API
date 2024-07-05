@@ -139,7 +139,6 @@ exports.resetpassword = async(req, res)=>{
     try{
         const {id, token} = req.params
         const {new_password, c_new_password} = req.body
-        console.log(req.params, req.body);
         if(new_password != c_new_password){
             return res.status(400).json({status: 'error', message:"Confirm password is not match!"})
         }
