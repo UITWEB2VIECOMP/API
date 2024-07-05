@@ -7,16 +7,16 @@ const crypto = require('crypto');
 exports.register = async(req, res)=>{
     const {firstname, lastname,DOB, email, password, passwordConfirm} = req.body
     try{
-        const [check] = await db.query('SELECT email FROM users where email = ?', [email]);
+        const [check] = await db.query('SELECT email FROM Users where email = ?', [email]);
         if(check.length > 0){
             return res.status(400).json({status: "error", message: 'email in use'})
         }else if(password !== passwordConfirm){
             return res.status(400).json({status: "error", message: 'password do not match'})
         }
         let hashedPassword = await bcrypt.hash(password, 8);
-        const [roles] = await db.query('SELECT role_id FROM roles WHERE role_name = ?', ['student']);
-        const roleID = roles[0].role_id;
-        const [insertUser] = await db.query('INSERT INTO users SET ?', { email: email, password_hash: hashedPassword, role_id: roleID });
+        const [Roles] = await db.query('SELECT role_id FROM Roles WHERE role_name = ?', ['student']);
+        const roleID = Roles[0].role_id;
+        const [insertUser] = await db.query('INSERT INTO Users SET ?', { email: email, password_hash: hashedPassword, role_id: roleID });
         const userID = insertUser.insertId;
         await db.query('INSERT INTO Participants SET ?', { user_id: userID, first_name: firstname, last_name: lastname, dob: DOB });
 
@@ -39,13 +39,13 @@ exports.verify = async(req,res)=>{
     try{
         await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
         const {id, token } = req.params
-        const [userCheck] = await db.query('SELECT user_id FROM users WHERE user_id = ?', [id]);
+        const [userCheck] = await db.query('SELECT user_id FROM Users WHERE user_id = ?', [id]);
         if(userCheck.length === 0){return res.status(400).json({status:"error",message:"Invalid link"})}
         const [tokenCheck] = await db.query('SELECT user_id, token FROM tokens WHERE user_id = ? AND token=? AND token_type = ?', [id, token, "emailverify"])
 
         if(tokenCheck.length === 0){return res.status(400).json({status:"error",message:"Invalid link or link is expired"})}
 
-        await db.query('UPDATE users SET verified = TRUE WHERE user_id = ?',[id])
+        await db.query('UPDATE Users SET verified = TRUE WHERE user_id = ?',[id])
         await db.query('DELETE FROM tokens WHERE user_id = ? AND token_type = ?',[id, 'emailverify'])
         
         return res.status(200).json({status:"success", message:"email verified successfully"})
@@ -59,7 +59,7 @@ exports.resend = async(req, res)=>{
     const { email } = req.body;
     try{
         await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
-        const [emailCheck] = await db.query('SELECT user_id,email, verified FROM users WHERE email = ?', [email]);
+        const [emailCheck] = await db.query('SELECT user_id,email, verified FROM Users WHERE email = ?', [email]);
 
         if (emailCheck.length === 0) {
             return res.status(404).json({ status: "error", message: "User not found" });
@@ -90,7 +90,7 @@ exports.forgetpassword = async(req, res)=>{
     const {email} = req.body
     try{
         await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
-        const [emailCheck] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
+        const [emailCheck] = await db.query('SELECT * FROM Users WHERE email = ?', [email]);
         if(emailCheck.length === 0){
             return res.status(400).json({status: "error", message: "email is not exist"}) 
         }
@@ -116,7 +116,7 @@ exports.resetpassword_check = async(req, res)=>{
     const {id, token } = req.params
     try{
         await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
-        const [checkID] = await db.query('SELECT * FROM users WHERE user_id = ?', [id]);
+        const [checkID] = await db.query('SELECT * FROM Users WHERE user_id = ?', [id]);
         if (checkID.length === 0) {
             return res.status(400).json({ status: "error", message: "User is not found" });
         }
@@ -142,7 +142,7 @@ exports.resetpassword = async(req, res)=>{
         if(new_password != c_new_password){
             return res.status(400).json({status: 'error', message:"Confirm password is not match!"})
         }
-        const [oldPassword] = await db.query('SELECT * FROM users WHERE user_id = ?', [id]);
+        const [oldPassword] = await db.query('SELECT * FROM Users WHERE user_id = ?', [id]);
         if (oldPassword.length === 0) {
             return res.status(400).json({ status: 'error', message: 'User not found' });
         }
@@ -153,7 +153,7 @@ exports.resetpassword = async(req, res)=>{
         }
         
         const hashedPassword = await bcrypt.hash(new_password, 8);
-        await db.query("UPDATE users SET password_hash = ? WHERE user_id = ?",[hashedPassword, id])
+        await db.query("UPDATE Users SET password_hash = ? WHERE user_id = ?",[hashedPassword, id])
 
         await db.query('DELETE FROM tokens WHERE user_id = ? AND token = ? AND token_type = ?',[id,token, 'resetpassword'])
         
@@ -171,7 +171,7 @@ exports.login = async(req, res)=>{
     }
     try{
         await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
-        const [emailCheck] = await db.query('SELECT email, password_hash ,user_id , role_id, verified FROM users WHERE email = ?', [email]);
+        const [emailCheck] = await db.query('SELECT email, password_hash ,user_id , role_id, verified FROM Users WHERE email = ?', [email]);
         if(emailCheck.length === 0 || !await bcrypt.compare(password, emailCheck[0].password_hash)){
             return res.status(400).json({status: "error", message: "email or password is incorrect"}) 
         }
@@ -179,7 +179,7 @@ exports.login = async(req, res)=>{
         if(!emailCheck[0].verified){
             return res.status(400).json({status:"error",message:"An email is sent to your account please check"})
         }
-        let [role] = await db.query('SELECT role_name FROM roles WHERE role_id = ?', [emailCheck[0].role_id]);
+        let [role] = await db.query('SELECT role_name FROM Roles WHERE role_id = ?', [emailCheck[0].role_id]);
         return res.status(200).json({status:'success', data:{user_id: emailCheck[0].user_id, role: role[0].role_name}})
         
     }catch (error) {
