@@ -125,9 +125,29 @@ exports.resetpassword_check = async(req, res)=>{
         if(checkToken === 0){
             return res.status(400).json({status:"error", message: "Link is invalid or expired"})
         }
+        
+        return res.status(200).json({status:"success", 
+                                    message:"Link is valid", 
+                                    data:{id: id, token: token}})
+    }catch (error) {
+        console.error(error);
+        return res.status(500).json({status: "error", message: 'Internal server error' });
+    }
+}
+
+exports.resetpassword = async(req, res)=>{
+    try{
+        const {id, token} = req.params
+        const {new_password, c_new_password} = req.body
+        if(new_password != c_new_password){
+            return res.status(400).json({status: 'error', message:"Confirm password is not match!"})
+        }
+        let hashedPassword = await bcrypt.hash(new_password, 8);
+        await db.query("UPDATE users SET password_hash = ? WHERE user_id = ?"[hashedPassword, id])
+
         await db.query('DELETE FROM tokens WHERE user_id = ? AND token = ? AND token_type = ?',[id,token, 'resetpassword'])
         
-        return res.status(200).json({status:"success", message:"Link is valid"})
+        res.status(200).json({status: "success", message: "Password change successfully!"})
     }catch (error) {
         console.error(error);
         return res.status(500).json({status: "error", message: 'Internal server error' });
