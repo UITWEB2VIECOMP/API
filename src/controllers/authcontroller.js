@@ -96,7 +96,6 @@ exports.forgetpassword = async(req, res)=>{
         }
         const expireDate = new Date(Date.now() + (60*60*1000));
         const [tokenCheck] = await db.query('SELECT token FROM tokens WHERE user_id = ? AND token_type = ?', [emailCheck[0].user_id, "resetpassword"]);
-        console.log(tokenCheck);
         var url = ''
         
         if(tokenCheck.length !== 0){
@@ -117,13 +116,14 @@ exports.resetpassword_check = async(req, res)=>{
     const {id, token } = req.params
     try{
         await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
-        const [checkID] = db.query('SELECT * FROM users WHERE user_id = ?',[id])
-        if(checkID === 0){
-            return res.status(400).json({status:"error", message: "User is not found"})
+        const [checkID] = await db.query('SELECT * FROM users WHERE user_id = ?', [id]);
+        if (checkID.length === 0) {
+            return res.status(400).json({ status: "error", message: "User is not found" });
         }
-        const [checkToken] = db.query('SELECT * FROM tokens WHERE user_id = ? AND token = ? AND token_type = ?',[id, token, "resetpassword"])
-        if(checkToken === 0){
-            return res.status(400).json({status:"error", message: "Link is invalid or expired"})
+
+        const [checkToken] = await db.query('SELECT * FROM tokens WHERE user_id = ? AND token = ? AND token_type = ?', [id, token, "resetpassword"]);
+        if (checkToken.length === 0) {
+            return res.status(400).json({ status: "error", message: "Link is invalid or expired" });
         }
         
         return res.status(200).json({status:"success", 
@@ -139,11 +139,22 @@ exports.resetpassword = async(req, res)=>{
     try{
         const {id, token} = req.params
         const {new_password, c_new_password} = req.body
+        console.log(req.params, req.body);
         if(new_password != c_new_password){
             return res.status(400).json({status: 'error', message:"Confirm password is not match!"})
         }
-        let hashedPassword = await bcrypt.hash(new_password, 8);
-        await db.query("UPDATE users SET password_hash = ? WHERE user_id = ?"[hashedPassword, id])
+        const [oldPassword] = await db.query('SELECT * FROM users WHERE user_id = ?', [id]);
+        if (oldPassword.length === 0) {
+            return res.status(400).json({ status: 'error', message: 'User not found' });
+        }
+        
+        const match = await bcrypt.compare(new_password, oldPassword[0].password_hash);
+        if (match) {
+            return res.status(400).json({ status: 'error', message: 'New password should be different from the old password' });
+        }
+        
+        const hashedPassword = await bcrypt.hash(new_password, 8);
+        await db.query("UPDATE users SET password_hash = ? WHERE user_id = ?",[hashedPassword, id])
 
         await db.query('DELETE FROM tokens WHERE user_id = ? AND token = ? AND token_type = ?',[id,token, 'resetpassword'])
         
