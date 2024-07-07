@@ -1,6 +1,6 @@
 const db = require('../../database')
 const mysql = require('mysql2')
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 
 exports.getUser = async(req, res)=>{
     try{
@@ -38,4 +38,8 @@ exports.changePassword  = async(req, res)=>{
         console.error(error);
         return res.status(500).json({status: "error", message: 'Internal server error' });
     }
+}
+
+exports.uploadAvatar = async(req, res)=>{
+    return res.json(req.file)
 }
