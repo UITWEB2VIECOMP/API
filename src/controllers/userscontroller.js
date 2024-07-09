@@ -2,7 +2,7 @@ const db = require('../../database')
 const mysql = require('mysql2')
 const bcrypt = require('bcrypt');
 const dotenv = require('dotenv')
-const {getStorage, ref,uploadBytesResumable, getDownloadURL} =require('firebase/storage')
+const {getStorage, ref,uploadBytesResumable, getDownloadURL, deleteObject} =require('firebase/storage')
 const {signInWithEmailAndPassword} =require('firebase/auth')
 const {auth} = require('../../config/firebase.config')
 const { v4: uuid } = require('uuid');
@@ -18,6 +18,23 @@ const uploadImage = async(file, type)=>{
     return downloadURL;
 }
 
+const deleteImage = async(furl, type)=>{
+    try{
+        const storageFB = getStorage()
+        await signInWithEmailAndPassword(auth, process.env.FIREBASE_USER, process.env.FIREBASE_AUTH)
+    
+        const url = new URL(furl)
+        const path = url.pathname;
+        const spliturl = path.split('/').pop();
+        const decodedFileName = decodeURIComponent(spliturl).split('/').pop();
+        const filename = `${type}/${decodedFileName}`
+        const storageRef = ref(storageFB,filename)
+        await deleteObject(storageRef)
+    }   catch (error) {
+        console.error(error);
+        return res.status(500).json({status: "error", message: 'Internal server error' });
+    }
+}
 exports.uploadAvatar = async(req, res)=>{
     const {user_id} = req.headers
     try{
@@ -25,6 +42,9 @@ exports.uploadAvatar = async(req, res)=>{
         if(user.length === 0){
             return res.status(400).json({status:'error',message: "user is not exist" })
         } 
+        if(user[0].avatar !== 'https://firebasestorage.googleapis.com/v0/b/viecontest-e4a3c.appspot.com/o/avatar%2F76336a09-ca5d-4fbb-a294-d44e4cc54999?alt=media&token=4713c098-e832-4224-8657-d296bc658171'){
+            await deleteImage(user[0].avatar,'avatar')
+        }
         const file = {
             type: req.file.mimetype,
             buffer: req.file.buffer
