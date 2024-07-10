@@ -57,16 +57,32 @@ exports.uploadAvatar = async(req, res)=>{
 
 exports.getUser = async(req, res)=>{
     try{
-        const {user_id} = req.headers
-        const info = await db.query('SELECT t1.email, t1.avatar, t2.* FROM Users AS t1 JOIN Participants AS t2 ON t1.user_id = t2.user_id WHERE t1.user_id = ?',[user_id])
-        return res.status(200).json({
-            first_name: info[0][0].first_name,
-            last_name: info[0][0].last_name,
-            email: info[0][0].email,
-            dob: info[0][0].dob,
-            avatar: info[0][0].avatar,
-            prizes: info[0][0].prizes||[]
-        })
+        const {user_id, role} = req.headers
+        if(!role){
+            return res.status(400).json({status: "error", message: 'No role found' });
+        }
+        if(role === "student"){
+            const info = await db.query('SELECT t1.email, t1.avatar, t2.* FROM Users AS t1 JOIN Participants AS t2 ON t1.user_id = t2.user_id WHERE t1.user_id = ?',[user_id])
+            return res.status(200).json({
+                first_name: info[0][0].first_name,
+                last_name: info[0][0].last_name,
+                email: info[0][0].email,
+                dob: info[0][0].dob,
+                avatar: info[0][0].avatar,
+                prizes: info[0][0].prizes||[]
+            })
+        }else{
+            const info = await db.query('SELECT t1.email, t1.avatar, t2.* FROM Users AS t1 JOIN Corporations AS t2 ON t1.user_id = t2.user_id WHERE t1.user_id = ?',[user_id])
+            return res.status(200).json({
+                corp_name: info[0][0].corp_name,
+                email: info[0][0].email,
+                address: info[0][0].address,
+                contact_info: info[0][0].contact_info,
+                avatar: info[0][0].avatar
+            })
+        }
+        
+
     }catch (error) {
         console.error(error);
         return res.status(500).json({status: "error", message: 'Internal server error' });
