@@ -39,9 +39,6 @@ exports.uploadAvatar = async(req, res)=>{
     const {user_id} = req.headers
     try{
         const [user] = await db.query('SELECT * FROM Users WHERE user_id = ?',[user_id])
-        if(user.length === 0){
-            return res.status(400).json({status:'error',message: "user is not exist" })
-        } 
         if(user[0].avatar !== 'https://firebasestorage.googleapis.com/v0/b/viecontest-e4a3c.appspot.com/o/avatar%2F76336a09-ca5d-4fbb-a294-d44e4cc54999?alt=media&token=4713c098-e832-4224-8657-d296bc658171'){
             await deleteImage(user[0].avatar,'avatar')
         }
@@ -61,10 +58,6 @@ exports.uploadAvatar = async(req, res)=>{
 exports.getUser = async(req, res)=>{
     try{
         const {user_id} = req.headers
-        const [user] = await db.query('SELECT * FROM Users WHERE user_id = ?',[user_id])
-        if(user.length === 0){
-            return res.status(400).json({status:'error',message: "user is not exist" })
-        } 
         const info = await db.query('SELECT t1.email, t1.avatar, t2.* FROM Users AS t1 JOIN Participants AS t2 ON t1.user_id = t2.user_id WHERE t1.user_id = ?',[user_id])
         return res.status(200).json({
             first_name: info[0][0].first_name,
@@ -80,15 +73,15 @@ exports.getUser = async(req, res)=>{
     }
 }
 exports.changePassword  = async(req, res)=>{
-    const {user_id} = req.headers['user_id']
+    const {user_id} = req.headers
     const {old_password, new_password, c_new_password} = req.body   
     try{
-        const [user] = db.query('SELECT * FROM Users WHERE user_id = ?',[user_id])
-        if(user.length === 0){
-            return res.status(400).json({status:'error',message: "user is not exist" })
-        } 
+        const [user] = await db.query('SELECT * FROM Users WHERE user_id = ?',[user_id])
         if(!await bcrypt.compare(old_password, user[0].password_hash)){
             return res.status(400).json({status:'error',message: "Password is incorrect" })
+        }
+        if (new_password===old_password) {
+            return res.status(400).json({ status: 'error', message: 'New password should be different from the old password' });
         }
         if(new_password != c_new_password){
             return res.status(401).json({status: 'error', message:"Confirm password is not match!"})
