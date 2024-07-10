@@ -22,3 +22,22 @@ exports.getUpcoming = async (req, res) => {
       return res.status(500).json({ status: "error", message: 'Internal server error' });
     }
   };
+
+  exports.getParticipating = async(req, res)=>{
+    const {user_id} = req.headers
+    try{
+      const [participant] = await db.query('SELECT participant_id FROM Participants WHERE user_id = ?',[user_id])
+      if (!participant.length) {
+        return res.status(404).json({ status: "error", message: 'Participant not found' });
+      }
+      const [contest] = await db.query(`SELECT c.* 
+                                      FROM Contests AS c
+                                      JOIN ContestParticipants AS cp 
+                                      ON c.contest_id = cp.contest_id
+                                      WHERE cp.participant_id = ?`,[participant[0].participant_id])
+      return res.status(200).json({ status: "success", contests: contest });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ status: "error", message: 'Internal server error' });
+    }
+  }
