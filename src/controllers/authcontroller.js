@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt')
 const sendEmail = require('./sendEmail');
 const mysql = require('mysql2')
 const crypto = require('crypto');
+const { log } = require('console');
 
 exports.register = async(req, res)=>{
     const {firstname, lastname,DOB, email, password, passwordConfirm} = req.body
@@ -139,6 +140,8 @@ exports.resetpassword = async(req, res)=>{
     try{
         const {id, token} = req.params
         const {new_password, c_new_password} = req.body
+        console.log(new_password);
+        console.log(c_new_password);
         if(new_password != c_new_password){
             return res.status(400).json({status: 'error', message:"Confirm password is not match!"})
         }
@@ -146,7 +149,7 @@ exports.resetpassword = async(req, res)=>{
         if (oldPassword.length === 0) {
             return res.status(400).json({ status: 'error', message: 'User not found' });
         }
-        
+        console.log(oldPassword[0]);
         const match = await bcrypt.compare(new_password, oldPassword[0].password_hash);
         if (match) {
             return res.status(400).json({ status: 'error', message: 'New password should be different from the old password' });
