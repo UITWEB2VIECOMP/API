@@ -90,7 +90,21 @@ exports.changeAddress= async(req, res)=>{
         db.release()
     }
 }
+exports.changeDescription= async(req, res)=>{
+    const db = await pool.getConnection()
 
+    try{
+        const {user_id, role} = req.headers
+        const {description} = req.body
+        await db.query("UPDATE Corporations SET description = ? WHERE user_id = ?",[description, user_id])
+        return res.status(200).json({status: "success", message: "Address change successfully!"})
+    }catch (error) {
+        console.error(error);
+        return res.status(500).json({status: "error", message: 'Internal server error' });
+    }finally{
+        db.release()
+    }
+}
 exports.changeContactInfo =  async(req, res)=>{
     const db = await pool.getConnection()
 
@@ -140,6 +154,7 @@ exports.getUser = async(req, res)=>{
         }
         if(role === "student"){
             const info = await db.query('SELECT t1.email, t1.avatar, t1.created_at, t2.* FROM Users AS t1 JOIN Participants AS t2 ON t1.user_id = t2.user_id WHERE t1.user_id = ?',[user_id])
+            const has_participated = await db.query("SELECT * FROM ContestParticipants WHERE participant_id IN(SELECT participant_id FROM Participants WHERE user_id = ?)",[user_id])
             return res.status(200).json({
                 first_name: info[0][0].first_name,
                 last_name: info[0][0].last_name,
@@ -147,17 +162,21 @@ exports.getUser = async(req, res)=>{
                 dob: info[0][0].dob,
                 avatar: info[0][0].avatar,
                 created_at: info[0][0].created_at,
-                prizes: info[0][0].prizes||[]
+                prizes: info[0][0].prizes||[],
+                has_participated: has_participated[0].length
             })
         }else{
             const info = await db.query('SELECT t1.email, t1.avatar,t1.created_at, t2.* FROM Users AS t1 JOIN Corporations AS t2 ON t1.user_id = t2.user_id WHERE t1.user_id = ?',[user_id])
+            const has_hosted = await db.query("SELECT * FROM Contests WHERE corporation_id IN(SELECT corporation_id FROM Corporations WHERE user_id = ?)",[user_id])
             return res.status(200).json({
                 corp_name: info[0][0].corp_name,
                 email: info[0][0].email,
                 address: info[0][0].address,
                 contact_info: info[0][0].contact_info,
                 created_at: info[0][0].created_at,
-                avatar: info[0][0].avatar
+                description: info[0][0].description || [],
+                avatar: info[0][0].avatar,
+                has_hosted:has_hosted[0].length
             })
         }
         
