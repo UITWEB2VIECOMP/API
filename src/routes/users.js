@@ -1,5 +1,5 @@
 const express = require('express');
-const {changePassword, uploadAvatar, getUser} = require('../controllers/userscontroller')
+const {changePassword, uploadAvatar, getUser, changeAddress, changeName, changeDOB, changeContactInfo} = require('../controllers/userscontroller')
 const router = express.Router()
 const {checkAuth} = require('../../middleware/checkAuth')
 const {uploadImg, multerErrorHandling}=require('../../middleware/multer')
@@ -8,6 +8,11 @@ router.use(checkAuth)
 router.post('/upload-avatar', uploadImg, uploadAvatar);
 router.post('/change-password', changePassword)
 router.get('/get-user', getUser)
+router.post('/change-name', changeName)
+router.post('/change-dob', changeDOB)
+router.post('/change-address', changeAddress)
+router.post('/change-contact', changeContactInfo)
+
 
 router.use(multerErrorHandling)
 

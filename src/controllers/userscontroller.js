@@ -35,6 +35,63 @@ const deleteImage = async(furl, type)=>{
         return res.status(500).json({status: "error", message: 'Internal server error' });
     }
 }
+
+exports.changeName= async(req, res)=>{
+    const {user_id, role} = req.headers
+    try{
+        if(role==="student"){
+            const {first_name , last_name} = req.body
+            console.log(first_name, last_name);
+            await db.query("UPDATE Participants SET first_name = ?, last_name=? WHERE user_id = ?",[first_name, last_name, user_id])
+            return res.status(200).json({status: "success", message: "Name change successfully!"})
+        }else{
+            const {corp_name} = req.body
+            await db.query("UPDATE Corporations SET corp_name = ? WHERE user_id = ?",[corp_name, user_id])
+            return res.status(200).json({status: "success", message: "Name change successfully!"})
+        }
+    }catch (error) {
+        console.error(error);
+        return res.status(500).json({status: "error", message: 'Internal server error' });
+    }
+}
+
+exports.changeDOB= async(req, res)=>{
+    try{
+        const {user_id, role} = req.headers
+        const {DOB} = req.body
+        await db.query("UPDATE Participants SET dob = ? WHERE user_id = ?",[DOB, user_id])
+        return res.status(200).json({status: "success", message: "DOB change successfully!"})
+    }catch (error) {
+        console.error(error);
+        return res.status(500).json({status: "error", message: 'Internal server error' });
+    }
+}
+
+exports.changeAddress= async(req, res)=>{
+    try{
+        const {user_id, role} = req.headers
+        const {address} = req.body
+        await db.query("UPDATE Corporations SET address = ? WHERE user_id = ?",[address, user_id])
+        return res.status(200).json({status: "success", message: "Address change successfully!"})
+    }catch (error) {
+        console.error(error);
+        return res.status(500).json({status: "error", message: 'Internal server error' });
+    }
+}
+
+exports.changeContactInfo =  async(req, res)=>{
+    try{
+        const {user_id, role} = req.headers
+        const {contact_info} = req.body
+        await db.query("UPDATE Corporations SET contact_info = ? WHERE user_id = ?",[contact_info, user_id])
+        return res.status(200).json({status: "success", message: "contact info change successfully!"})
+    }catch (error) {
+        console.error(error);
+        return res.status(500).json({status: "error", message: 'Internal server error' });
+    }
+}
+
+
 exports.uploadAvatar = async(req, res)=>{
     const {user_id} = req.headers
     try{
@@ -112,4 +169,5 @@ exports.changePassword  = async(req, res)=>{
         return res.status(500).json({status: "error", message: 'Internal server error' });
     }
 }
+
 

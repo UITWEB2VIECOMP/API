@@ -1,13 +1,14 @@
-const db = require('../../database')
+const pool = require('../../database')
 const bcrypt = require('bcrypt')
 const sendEmail = require('./sendEmail');
 const mysql = require('mysql2')
 const crypto = require('crypto');
-const { log } = require('console');
+
 
 exports.register = async(req, res)=>{
     const {firstname, lastname,DOB, email, password, passwordConfirm} = req.body
     try{
+        const db = await pool.getConnection()
         const [check] = await db.query('SELECT email FROM Users where email = ?', [email]);
         if(check.length > 0){
             return res.status(400).json({status: "error", message: 'email in use'})
@@ -32,12 +33,48 @@ exports.register = async(req, res)=>{
     }catch (error) {
         console.error(error);
         return res.status(500).json({status: "error", message: 'Internal server error' });
+    }finally{
+        db.release()
+    }
+}
+
+exports.registerCorp = async(req, res)=>{
+    const {corp_name,address,contact_info, email, password, passwordConfirm} = req.body
+    try{
+        const db = await pool.getConnection()
+        const [check] = await db.query('SELECT email FROM Users where email = ?', [email]);
+        if(check.length > 0){
+            return res.status(400).json({status: "error", message: 'email in use'})
+        }else if(password !== passwordConfirm){
+            return res.status(400).json({status: "error", message: 'password do not match'})
+        }
+        let hashedPassword = await bcrypt.hash(password, 8);
+        const [Roles] = await db.query('SELECT role_id FROM Roles WHERE role_name = ?', ['corporation']);
+        const roleID = Roles[0].role_id;
+        const [insertUser] = await db.query('INSERT INTO Users SET ?', { email: email, password_hash: hashedPassword, role_id: roleID });
+        const userID = insertUser.insertId;
+        await db.query('INSERT INTO Corporations SET ?', { user_id: userID, corp_name: corp_name, address: address, contact_info: contact_info });
+
+        const token_value = crypto.randomBytes(32).toString("hex")
+        const expireDate = new Date(Date.now() + (60*60*1000));
+        await db.query('INSERT INTO tokens SET ?',{user_id: userID, token: token_value,token_type: "emailverify", expires_at: expireDate })
+
+        const url = `${process.env.VERIFY_BASE_URL}auth/${userID}/verify/${token_value}`
+        await sendEmail(email, "Verify email", url)
+        return res.status(200).json({ status: "success",message: 'An email send to your account please verify' });
+    }catch (error) {
+        console.error(error);
+        return res.status(500).json({status: "error", message: 'Internal server error' });
+    }finally{
+        db.release()
     }
 }
 
 
+
 exports.verify = async(req,res)=>{
     try{
+        const db = await pool.getConnection()
         await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
         const {id, token } = req.params
         const [userCheck] = await db.query('SELECT user_id FROM Users WHERE user_id = ?', [id]);
@@ -53,12 +90,15 @@ exports.verify = async(req,res)=>{
     }catch (error) {
         console.error(error);
         return res.status(500).json({status: "error", message: 'Internal server error' });
+    }finally{
+        db.release()
     }
 }
 
 exports.resend = async(req, res)=>{
     const { email } = req.body;
     try{
+        const db = await pool.getConnection()
         await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
         const [emailCheck] = await db.query('SELECT user_id,email, verified FROM Users WHERE email = ?', [email]);
 
@@ -84,12 +124,15 @@ exports.resend = async(req, res)=>{
     }catch (error) {
         console.error(error);
         return res.status(500).json({status: "error", message: 'Internal server error' });
+    }finally{
+        db.release()
     }
 }
 
 exports.forgetpassword = async(req, res)=>{
     const {email} = req.body
     try{
+        const db = await pool.getConnection()
         await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
         const [emailCheck] = await db.query('SELECT * FROM Users WHERE email = ?', [email]);
         if(emailCheck.length === 0){
@@ -110,12 +153,15 @@ exports.forgetpassword = async(req, res)=>{
     }catch (error) {
         console.error(error);
         return res.status(500).json({status: "error", message: 'Internal server error' });
+    }finally{
+        db.release()
     }
 }
 
 exports.resetpassword_check = async(req, res)=>{
     const {id, token } = req.params
     try{
+        const db = await pool.getConnection()
         await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
         const [checkID] = await db.query('SELECT * FROM Users WHERE user_id = ?', [id]);
         if (checkID.length === 0) {
@@ -133,11 +179,14 @@ exports.resetpassword_check = async(req, res)=>{
     }catch (error) {
         console.error(error);
         return res.status(500).json({status: "error", message: 'Internal server error' });
+    }finally{
+        db.release()
     }
 }
 
 exports.resetpassword = async(req, res)=>{
     try{
+        const db = await pool.getConnection()
         const {id, token} = req.params
         const {new_password, c_new_password} = req.body
         console.log(new_password);
@@ -164,10 +213,13 @@ exports.resetpassword = async(req, res)=>{
     }catch (error) {
         console.error(error);
         return res.status(500).json({status: "error", message: 'Internal server error' });
+    }finally{
+        db.release()
     }
 }
 
 exports.login = async(req, res)=>{
+    const db = await pool.getConnection()
     const {email, password} = req.body
     if(!email || !password){
         return res.status(400).json({status: "error", message: "Plese enter your email and password"})
@@ -188,5 +240,7 @@ exports.login = async(req, res)=>{
     }catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Internal server error' });
+    }finally{
+        db.release()
     }
 }

@@ -1,10 +1,12 @@
 const express = require('express');
 const {register, login, verify, 
        resend, forgetpassword,
-       resetpassword_check, resetpassword} = require('../controllers/authcontroller')
+       resetpassword_check, resetpassword, registerCorp} = require('../controllers/authcontroller')
 const router = express.Router()
 
 router.post('/register', register)
+
+router.post('/register-corp', registerCorp)
 
 router.post('/login', login)
 
