@@ -7,8 +7,8 @@ const crypto = require('crypto');
 
 exports.register = async(req, res)=>{
     const {firstname, lastname,DOB, email, password, passwordConfirm} = req.body
+    const db = await pool.getConnection()
     try{
-        const db = await pool.getConnection()
         const [check] = await db.query('SELECT email FROM Users where email = ?', [email]);
         if(check.length > 0){
             return res.status(400).json({status: "error", message: 'email in use'})
@@ -40,8 +40,9 @@ exports.register = async(req, res)=>{
 
 exports.registerCorp = async(req, res)=>{
     const {corp_name,address,contact_info, email, password, passwordConfirm} = req.body
+    const db = await pool.getConnection()
+
     try{
-        const db = await pool.getConnection()
         const [check] = await db.query('SELECT email FROM Users where email = ?', [email]);
         if(check.length > 0){
             return res.status(400).json({status: "error", message: 'email in use'})
@@ -73,8 +74,9 @@ exports.registerCorp = async(req, res)=>{
 
 
 exports.verify = async(req,res)=>{
+    const db = await pool.getConnection()
+
     try{
-        const db = await pool.getConnection()
         await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
         const {id, token } = req.params
         const [userCheck] = await db.query('SELECT user_id FROM Users WHERE user_id = ?', [id]);
@@ -97,8 +99,9 @@ exports.verify = async(req,res)=>{
 
 exports.resend = async(req, res)=>{
     const { email } = req.body;
+    const db = await pool.getConnection()
+
     try{
-        const db = await pool.getConnection()
         await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
         const [emailCheck] = await db.query('SELECT user_id,email, verified FROM Users WHERE email = ?', [email]);
 
@@ -131,8 +134,9 @@ exports.resend = async(req, res)=>{
 
 exports.forgetpassword = async(req, res)=>{
     const {email} = req.body
+    const db = await pool.getConnection()
+
     try{
-        const db = await pool.getConnection()
         await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
         const [emailCheck] = await db.query('SELECT * FROM Users WHERE email = ?', [email]);
         if(emailCheck.length === 0){
@@ -160,8 +164,9 @@ exports.forgetpassword = async(req, res)=>{
 
 exports.resetpassword_check = async(req, res)=>{
     const {id, token } = req.params
+    const db = await pool.getConnection()
+
     try{
-        const db = await pool.getConnection()
         await db.query('DELETE FROM tokens WHERE expires_at < ?', [new Date()]);
         const [checkID] = await db.query('SELECT * FROM Users WHERE user_id = ?', [id]);
         if (checkID.length === 0) {
@@ -185,8 +190,9 @@ exports.resetpassword_check = async(req, res)=>{
 }
 
 exports.resetpassword = async(req, res)=>{
+    const db = await pool.getConnection()
+
     try{
-        const db = await pool.getConnection()
         const {id, token} = req.params
         const {new_password, c_new_password} = req.body
         console.log(new_password);

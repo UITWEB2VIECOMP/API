@@ -38,8 +38,9 @@ const deleteImage = async(furl, type)=>{
 
 exports.changeName= async(req, res)=>{
     const {user_id, role} = req.headers
+    const db = await pool.getConnection()
+
     try{
-        const db = await pool.getConnection()
         if(role==="student"){
             const {first_name , last_name} = req.body
             console.log(first_name, last_name);
@@ -59,8 +60,9 @@ exports.changeName= async(req, res)=>{
 }
 
 exports.changeDOB= async(req, res)=>{
+    const db = await pool.getConnection()
+
     try{
-        const db = await pool.getConnection()
         const {user_id, role} = req.headers
         const {DOB} = req.body
         await db.query("UPDATE Participants SET dob = ? WHERE user_id = ?",[DOB, user_id])
@@ -74,8 +76,9 @@ exports.changeDOB= async(req, res)=>{
 }
 
 exports.changeAddress= async(req, res)=>{
+    const db = await pool.getConnection()
+
     try{
-        const db = await pool.getConnection()
         const {user_id, role} = req.headers
         const {address} = req.body
         await db.query("UPDATE Corporations SET address = ? WHERE user_id = ?",[address, user_id])
@@ -89,8 +92,9 @@ exports.changeAddress= async(req, res)=>{
 }
 
 exports.changeContactInfo =  async(req, res)=>{
+    const db = await pool.getConnection()
+
     try{
-        const db = await pool.getConnection()
         const {user_id, role} = req.headers
         const {contact_info} = req.body
         await db.query("UPDATE Corporations SET contact_info = ? WHERE user_id = ?",[contact_info, user_id])
@@ -106,8 +110,8 @@ exports.changeContactInfo =  async(req, res)=>{
 
 exports.uploadAvatar = async(req, res)=>{
     const {user_id} = req.headers
+    const db = await pool.getConnection()
     try{
-        const db = await pool.getConnection()
         const [user] = await db.query('SELECT * FROM Users WHERE user_id = ?',[user_id])
         if(user[0].avatar !== 'https://firebasestorage.googleapis.com/v0/b/viecontest-e4a3c.appspot.com/o/avatar%2F76336a09-ca5d-4fbb-a294-d44e4cc54999?alt=media&token=4713c098-e832-4224-8657-d296bc658171'){
             await deleteImage(user[0].avatar,'avatar')
@@ -128,8 +132,8 @@ exports.uploadAvatar = async(req, res)=>{
 }
 
 exports.getUser = async(req, res)=>{
+    const db = await pool.getConnection()
     try{
-        const db = await pool.getConnection()
         const {user_id, role} = req.headers
         if(!role){
             return res.status(400).json({status: "error", message: 'No role found' });
@@ -166,8 +170,8 @@ exports.getUser = async(req, res)=>{
 exports.changePassword  = async(req, res)=>{
     const {user_id} = req.headers
     const {old_password, new_password, c_new_password} = req.body   
+    const db = await pool.getConnection()
     try{
-        const db = await pool.getConnection()
         const [user] = await db.query('SELECT * FROM Users WHERE user_id = ?',[user_id])
         if(!await bcrypt.compare(old_password, user[0].password_hash)){
             return res.status(400).json({status:'error',message: "Password is incorrect" })
