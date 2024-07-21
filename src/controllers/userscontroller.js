@@ -43,6 +43,9 @@ exports.changeName= async(req, res)=>{
     try{
         if(role==="student"){
             const {first_name , last_name} = req.body
+            if(!first_name || !last_name){
+                return res.status(400).json({ status: 'error', message: 'Missing value provided' });
+            }
             console.log(first_name, last_name);
             await db.query("UPDATE Participants SET first_name = ?, last_name=? WHERE user_id = ?",[first_name, last_name, user_id])
             return res.status(200).json({status: "success", message: "Name change successfully!"})
@@ -65,6 +68,9 @@ exports.changeDOB= async(req, res)=>{
     try{
         const {user_id, role} = req.headers
         const {DOB} = req.body
+        if(!DOB){
+            return res.status(400).json({ status: 'error', message: 'Missing value provided' });
+        }
         await db.query("UPDATE Participants SET dob = ? WHERE user_id = ?",[DOB, user_id])
         return res.status(200).json({status: "success", message: "DOB change successfully!"})
     }catch (error) {
@@ -81,6 +87,9 @@ exports.changeAddress= async(req, res)=>{
     try{
         const {user_id, role} = req.headers
         const {address} = req.body
+        if(!address){
+            return res.status(400).json({ status: 'error', message: 'Missing value provided' });
+        }
         await db.query("UPDATE Corporations SET address = ? WHERE user_id = ?",[address, user_id])
         return res.status(200).json({status: "success", message: "Address change successfully!"})
     }catch (error) {
@@ -96,6 +105,9 @@ exports.changeDescription= async(req, res)=>{
     try{
         const {user_id, role} = req.headers
         const {description} = req.body
+        if(!description){
+            return res.status(400).json({ status: 'error', message: 'Missing value provided' });
+        }
         await db.query("UPDATE Corporations SET description = ? WHERE user_id = ?",[description, user_id])
         return res.status(200).json({status: "success", message: "Address change successfully!"})
     }catch (error) {
@@ -111,6 +123,9 @@ exports.changeContactInfo =  async(req, res)=>{
     try{
         const {user_id, role} = req.headers
         const {contact_info} = req.body
+        if(!contact_info){
+            return res.status(400).json({ status: 'error', message: 'Missing value provided' });
+        }
         await db.query("UPDATE Corporations SET contact_info = ? WHERE user_id = ?",[contact_info, user_id])
         return res.status(200).json({status: "success", message: "contact info change successfully!"})
     }catch (error) {
@@ -126,6 +141,9 @@ exports.uploadAvatar = async(req, res)=>{
     const {user_id} = req.headers
     const db = await pool.getConnection()
     try{
+        if (!req.file) {
+            return res.status(400).json({ status: 'error', message: 'No file provided' });
+        }
         const [user] = await db.query('SELECT * FROM Users WHERE user_id = ?',[user_id])
         if(user[0].avatar !== 'https://firebasestorage.googleapis.com/v0/b/viecontest-e4a3c.appspot.com/o/avatar%2F76336a09-ca5d-4fbb-a294-d44e4cc54999?alt=media&token=4713c098-e832-4224-8657-d296bc658171'){
             await deleteImage(user[0].avatar,'avatar')
