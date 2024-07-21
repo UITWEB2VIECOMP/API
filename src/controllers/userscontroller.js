@@ -18,7 +18,7 @@ const uploadImage = async(file, type)=>{
     return downloadURL;
 }
 
-const deleteImage = async(furl, type)=>{
+const deleteImage = async(furl, type, res)=>{
     try{
         const storageFB = getStorage()
         await signInWithEmailAndPassword(auth, process.env.FIREBASE_USER, process.env.FIREBASE_AUTH)
