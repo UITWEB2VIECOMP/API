@@ -12,6 +12,8 @@ app.use(cors())
 app.use('/api/auth', require('./src/routes/auth'))
 app.use('/api/users', require('./src/routes/users'))
 app.use('/api/homepage', require('./src/routes/homepage'))
+app.use('/api/contest', require('./src/routes/contest'))
+
 
 const PORT = process.env.PORT|5000
 console.log(PORT);
