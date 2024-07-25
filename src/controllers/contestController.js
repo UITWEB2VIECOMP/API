@@ -177,7 +177,7 @@ exports.contestPage = async(req, res)=>{
                 JOIN Participants AS t2 ON t1.participant_id   =  t2.participant_id
                 JOIN Users AS t3 ON t2.user_id =  t3.user_id 
                 WHERE t1.contest_id = ? and t3. user_id =?`, [contest_id, user_id])
-            return res.status(200).json({status:"success", data: contest[0] , participated: participated[0].length !==0})
+            return res.status(200).json({status:"success", data: contest[0] , participated: participated.length !==0})
         }
     }catch(error){
         console.error(error);   
