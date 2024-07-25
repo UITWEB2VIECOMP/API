@@ -156,6 +156,19 @@ exports.contestPage = async(req, res)=>{
         JOIN Corporations AS t2 ON t1.corporation_id =  t2.corporation_id 
         JOIN Users AS t3 ON t2.user_id =  t3.user_id 
         WHERE contest_id = ?`, contest_id)
+        const [addtion] = await db.query(`SELECT 
+            COUNT(participant_id) AS total_participants,
+            SUM(CASE WHEN submission_status = 'submitted' THEN 1 ELSE 0 END) AS submitted_participants
+        FROM 
+            ContestParticipants
+        WHERE 
+            contest_id = ?
+        GROUP BY 
+            contest_id`, [contest_id])
+        const totalParticipants = addtion.length > 0 ? rows[0].total_participants : 0;
+        const submittedParticipants = addtion.length > 0 ? rows[0].submitted_participants : 0;
+        contest[0].total_participants = totalParticipants;
+        contest[0].submitted_participants = submittedParticipants;
         if(role  === "corporation"){
             return res.status(200).json({status:"success", data: contest[0]})
         }else{
