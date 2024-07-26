@@ -4,6 +4,7 @@ exports.checkAuth= async(req, res, next)=>{
     const db  = await pool.getConnection()
     const userId = req.headers['user_id'];
     const role = req.headers['role'];
+    console.log(userId, role);
     if (!userId || !role) {
       return res.status(400).json({status: 'error', message: 'User is not login' });
     }
