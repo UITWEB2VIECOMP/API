@@ -170,7 +170,8 @@ exports.contestPage = async(req, res)=>{
         contest[0].total_participants = totalParticipants;
         contest[0].submitted_participants = submittedParticipants;
         if(role  === "corporation"){
-            return res.status(200).json({status:"success", data: contest[0]})
+            const [corporation] = await db.query("SELECT corporation_id FROM Corporations WHERE user_id = ?", [user_id])
+            return res.status(200).json({status:"success", data: contest[0], hosted: corporation[0].corporation_id === contest[0].corporation_id})
         }else{
             const [participated] =await db.query(`SELECT contest_participant_id  
                 FROM ContestParticipants AS t1
