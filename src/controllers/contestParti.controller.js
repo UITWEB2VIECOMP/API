@@ -10,7 +10,7 @@ exports.joinContest = async(req, res)=>{
             return res.status(401).json({ status: "error", message: 'You have no permission' });
         }
         const [participant] = await db.query("SELECT participant_id FROM Participants WHERE user_id = ?",[user_id])
-        const [check] = await db.query("SELECT contest_participant_id in ContestParticipants WHERE participant_id = ? AND contest_id = ?",[participant[0].participant_id, contest_id])
+        const [check] = await db.query("SELECT contest_participant_id FROM ContestParticipants WHERE participant_id = ? AND contest_id = ?",[participant[0].participant_id, contest_id])
         if(check.length === 0){
             return res.status(401).json({ status: "error", message: 'You have already joined' });
         }
