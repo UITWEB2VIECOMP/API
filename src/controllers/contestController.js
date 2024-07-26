@@ -190,15 +190,26 @@ exports.contestPage = async(req, res)=>{
 
 exports.changeContestName=async(req, res)=>{
     const db = await pool.getConnection()
+    const {contest_id} = req.params
 
     try{
         const {user_id, role} = req.headers
         const {contest_name} = req.body
+        const [check] = await db.query(
+            `SELECT contest_name FROM Contests AS t1
+            JOIN Corporations AS t2 ON t1.corporation_id = t2.corporation_id 
+            JOIN Users AS t3 ON t2.user_id = t3.user_id
+            WHERE t1.contest_id = ? AND t3.user_id = ?`,
+            [contest_id, user_id]
+        );
+        if (role !== "corporation" || check.length === 0) {
+            return res.status(400).json({ status: 'error', message: 'No permission' });
+        }
         if(!contest_name){
             return res.status(400).json({ status: 'error', message: 'Missing value provided' });
         }
-        await db.query(`UPDATE Contests SET contest_name = ? WHERE corporation_id 
-            IN (SELECT corporation_id IN Corporations WHERE user_id = ?)`,[contest_name, user_id])
+        await db.query(`UPDATE Contests SET contest_name = ? WHERE contest_id = ?`,[contest_name, contest_id])
+
         return res.status(200).json({status: "success", message: "Name change successfully!"})
     }catch (error) {
         console.error(error);
@@ -210,15 +221,27 @@ exports.changeContestName=async(req, res)=>{
 
 exports.changeContestDescription=async(req, res)=>{
     const db = await pool.getConnection()
+    const {contest_id} = req.params
 
     try{
         const {user_id, role} = req.headers
         const {contest_description} = req.body
+        const [check] = await db.query(
+            `SELECT contest_name FROM Contests AS t1
+            JOIN Corporations AS t2 ON t1.corporation_id = t2.corporation_id 
+            JOIN Users AS t3 ON t2.user_id = t3.user_id
+            WHERE t1.contest_id = ? AND t3.user_id = ?`,
+            [contest_id, user_id]
+        );
+        if (role !== "corporation" || check.length === 0) {
+            return res.status(400).json({ status: 'error', message: 'No permission' });
+        }
+        
         if(!contest_description){
             return res.status(400).json({ status: 'error', message: 'Missing value provided' });
         }
-        await db.query(`UPDATE Contests SET contest_description = ? WHERE corporation_id 
-            IN (SELECT corporation_id IN Corporations WHERE user_id = ?)`,[contest_description, user_id])
+        await db.query(`UPDATE Contests SET contest_description = ? WHERE contest_id = ?`,[contest_description, contest_id])
+
         return res.status(200).json({status: "success", message: "Description change successfully!"})
     }catch (error) {
         console.error(error);
@@ -229,16 +252,25 @@ exports.changeContestDescription=async(req, res)=>{
 }
 exports.changePrizeDescription=async(req, res)=>{
     const db = await pool.getConnection()
-
+    const {contest_id} = req.params
     try{
         const {user_id, role} = req.headers
         const {prizes_description} = req.body
+        const [check] = await db.query(
+            `SELECT contest_name FROM Contests AS t1
+            JOIN Corporations AS t2 ON t1.corporation_id = t2.corporation_id 
+            JOIN Users AS t3 ON t2.user_id = t3.user_id
+            WHERE t1.contest_id = ? AND t3.user_id = ?`,
+            [contest_id, user_id]
+        );
+        if (role !== "corporation" || check.length === 0) {
+            return res.status(400).json({ status: 'error', message: 'No permission' });
+        }
         if(!prizes_description){
             return res.status(400).json({ status: 'error', message: 'Missing value provided' });
         }
-        await db.query(`UPDATE Contests SET prizes_description = ? WHERE corporation_id 
-            IN (SELECT corporation_id IN Corporations WHERE user_id = ?)`,[prizes_description, user_id])
-        return res.status(200).json({status: "success", message: "Address change successfully!"})
+        await db.query(`UPDATE Contests SET prizes_description = ? WHERE contest_id = ?`,[prizes_description, contest_id])
+        return res.status(200).json({status: "success", message: "Prize change successfully!"})
     }catch (error) {
         console.error(error);
         return res.status(500).json({status: "error", message: 'Internal server error' });
@@ -248,16 +280,61 @@ exports.changePrizeDescription=async(req, res)=>{
 }
 exports.changeContestImage=async(req, res)=>{
     const db = await pool.getConnection()
-
+    const {user_id, role} = req.headers
+    const {contest_id} = req.params
+    try{
+        const [check] = await db.query(
+            `SELECT contest_name FROM Contests AS t1
+            JOIN Corporations AS t2 ON t1.corporation_id = t2.corporation_id 
+            JOIN Users AS t3 ON t2.user_id = t3.user_id
+            WHERE t1.contest_id = ? AND t3.user_id = ?`,
+            [contest_id, user_id]
+        );
+        if (role !== "corporation" || check.length === 0) {
+            return res.status(400).json({ status: 'error', message: 'No permission' });
+        }
+        if (!req.file) {
+            return res.status(400).json({ status: 'error', message: 'No file provided' });
+        }
+        const [contest] = await db.query('SELECT * FROM Contests WHERE contest_id = ?',[contest_id])
+        if(contest[0].contest_image){
+            await deleteImage(contest[0].contest_image,'contestimg')
+        }
+        const file = {
+            type: req.file.mimetype,
+            buffer: req.file.buffer
+        }
+        const buildImage = await uploadImage(file,'contestimg')
+        await db.query('UPDATE Contests SET contest_image = ? WHERE contest_id = ?',[buildImage, contest_id])
+        res.status(200).json({status:'success', message:"avatar is updated successfully"})
+    }catch (error) {
+        console.error(error);
+        return res.status(500).json({status: "error", message: 'Internal server error' });
+    }finally{
+        db.release()
+    }
+}
+exports.changeDate=async(req, res)=>{
+    const db = await pool.getConnection()
+    const {contest_id} = req.params
     try{
         const {user_id, role} = req.headers
-        const {prizes_description} = req.body
-        if(!prizes_description){
+        const {start_date, end_date} = req.body
+        const [check] = await db.query(
+            `SELECT contest_name FROM Contests AS t1
+            JOIN Corporations AS t2 ON t1.corporation_id = t2.corporation_id 
+            JOIN Users AS t3 ON t2.user_id = t3.user_id
+            WHERE t1.contest_id = ? AND t3.user_id = ?`,
+            [contest_id, user_id]
+        );
+        if (role !== "corporation" || check.length === 0) {
+            return res.status(400).json({ status: 'error', message: 'No permission' });
+        }
+        if(!start_date || !end_date){
             return res.status(400).json({ status: 'error', message: 'Missing value provided' });
         }
-        await db.query(`UPDATE Contests SET prizes_description = ? WHERE corporation_id 
-            IN (SELECT corporation_id IN Corporations WHERE user_id = ?)`,[prizes_description, user_id])
-        return res.status(200).json({status: "success", message: "Address change successfully!"})
+        await db.query(`UPDATE Contests SET start_date = ?,end_date = ? WHERE contest_id = ?`,[start_date, end_date, contest_id])
+        return res.status(200).json({status: "success", message: "Date change successfully!"})
     }catch (error) {
         console.error(error);
         return res.status(500).json({status: "error", message: 'Internal server error' });
