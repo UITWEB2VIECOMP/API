@@ -165,8 +165,8 @@ exports.contestPage = async(req, res)=>{
             contest_id = ?
         GROUP BY 
             contest_id`, [contest_id])
-        const totalParticipants = addtion.length > 0 ? rows[0].total_participants : 0;
-        const submittedParticipants = addtion.length > 0 ? rows[0].submitted_participants : 0;
+        const totalParticipants = addtion.length > 0 ? addtion[0].total_participants : 0;
+        const submittedParticipants = addtion.length > 0 ? addtion[0].submitted_participants : 0;
         contest[0].total_participants = totalParticipants;
         contest[0].submitted_participants = submittedParticipants;
         if(role  === "corporation"){
