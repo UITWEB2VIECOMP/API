@@ -100,7 +100,7 @@ exports.getCorpManageInfo = async (req, res) => {
         }
 
         const [corporationResults] = await db.query("SELECT corporation_id FROM Corporations WHERE user_id = ?", [user_id]);
-
+        console.log(corporationResults);
         if (corporationResults.length === 0) {
             return res.status(404).json({ status: "error", message: 'Corporation not found' });
         }
@@ -108,19 +108,16 @@ exports.getCorpManageInfo = async (req, res) => {
         const corporation_id = corporationResults[0].corporation_id;
 
         const query = `
-            SELECT 
-                c.contest_id, 
-                c.contest_name,
-                cp.contest_participant_id
-            FROM Contests c
-            LEFT JOIN ContestParticipants cp ON c.contest_id = cp.contest_id
-            WHERE c.corporation_id = ? AND (cp.submission_status = 'submitted' OR cp.submission_status IS NULL)
-        `;
+        SELECT 
+            c.contest_id, 
+            c.contest_name
+        FROM Contests c
+        WHERE c.corporation_id = ?
+    `;
 
         const [results] = await db.query(query, [corporation_id]);
-
         const contests = [];
-        results.forEach(({ contest_id, contest_name, contest_participant_id }) => {
+        results.forEach(async({ contest_id, contest_name}) => {
             let contest = contests.find(c => c.contest_id === contest_id);
             if (!contest) {
                 contest = {
@@ -130,11 +127,8 @@ exports.getCorpManageInfo = async (req, res) => {
                 };
                 contests.push(contest);
             }
-            if (contest_participant_id) {
-                contest.submitted_participant.push({
-                    contest_participant_ID: contest_participant_id
-                });
-            }
+            const [participant] = await db.query("SELECT contest_participant_id FROM ContestParticipants WHERE submission_status = ? AND contest_id = ?",["submitted",contest_id ]);
+            contest.submitted_participant = participant
         });
 
         return res.status(200).json({ status: "success", data: contests });
