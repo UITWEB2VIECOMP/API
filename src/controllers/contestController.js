@@ -354,7 +354,7 @@ exports.deleteContest=async(req, res)=>{
         await db.query(`DELETE FROM ContestQuestions WHERE contest_id = ?`,[contest_id])
         await db.query(`DELETE FROM Submissions WHERE contest_id = ?`,[contest_id])
         await db.query(`DELETE FROM ContestParticipants WHERE contest_id = ?`,[contest_id])
-        await db.query(`DELETE FROM contests WHERE contest_id = ?`,[contest_id])
+        await db.query(`DELETE FROM Contests WHERE contest_id = ?`,[contest_id])
         return res.status(200).json({status: "success", message: "Delete successfully!"})
     }catch (error) {
         console.error(error);
