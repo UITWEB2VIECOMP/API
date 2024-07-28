@@ -16,7 +16,7 @@ exports.getOngoing = async (req, res) => {
                                       WHERE ? BETWEEN t1.start_date AND t1.end_date;
                                       `, [currentDate]);
       return res.status(200).json({ status: "success",
-                                   data: contests[0]||[]  });
+                                   data: contests||[]  });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ status: "error", message: 'Internal server error' });
@@ -68,7 +68,7 @@ exports.getOngoing = async (req, res) => {
         [participant[0].participant_id]
     );
     
-      return res.status(200).json({ status: "success", data: contest[0]||[] });
+      return res.status(200).json({ status: "success", data: contest||[] });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ status: "error", message: 'Internal server error' });
