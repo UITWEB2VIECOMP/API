@@ -127,7 +127,11 @@ exports.getCorpManageInfo = async (req, res) => {
                 };
                 contests.push(contest);
             }
-            const [participant] = await db.query("SELECT contest_participant_id FROM ContestParticipants WHERE submission_status = ? AND contest_id = ?",["submitted",contest_id ]);
+            const [participant] = await db.query(`SELECT t1.contest_participant_id , t2.submission_date
+                FROM ContestParticipants  AS t1
+                JOIN Submissions AS t2 ON t1.contest_participant_id = t2.contest_participant_id
+                WHERE t1.submission_status = ? 
+                AND t1.contest_id = ?`,["submitted",contest_id ]);
             contest.submitted_participant = participant
         });
 
