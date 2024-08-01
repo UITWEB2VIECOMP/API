@@ -117,7 +117,7 @@ exports.getCorpManageInfo = async (req, res) => {
 
         const [results] = await db.query(query, [corporation_id]);
         const contests = [];
-        results.forEach(async({ contest_id, contest_name}) => {
+        for (const { contest_id, contest_name } of results) {
             let contest = contests.find(c => c.contest_id === contest_id);
             if (!contest) {
                 contest = {
@@ -127,14 +127,20 @@ exports.getCorpManageInfo = async (req, res) => {
                 };
                 contests.push(contest);
             }
-            const [participant] = await db.query(`SELECT t1.contest_participant_id , t2.submission_date
-                FROM ContestParticipants  AS t1
+        
+            const [participants] = await db.query(`
+                SELECT t1.contest_participant_id, MAX(t2.submission_date) as latest_submission_date
+                FROM ContestParticipants AS t1
                 JOIN Submissions AS t2 ON t1.contest_participant_id = t2.contest_participant_id
                 WHERE t1.submission_status = ? 
-                AND t1.contest_id = ?`,["submitted",contest_id ]);
-            contest.submitted_participant = participant
-        });
-
+                AND t1.contest_id = ?
+                GROUP BY t1.contest_participant_id
+            `, ["submitted", contest_id]);
+        
+            console.log(`Participants for contest ${contest_id}:`, participants);
+        
+            contest.submitted_participant = participants;
+        }
         return res.status(200).json({ status: "success", data: contests });
     } catch (error) {
         console.error(error);
