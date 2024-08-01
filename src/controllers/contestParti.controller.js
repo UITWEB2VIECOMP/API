@@ -19,7 +19,7 @@ exports.joinContest = async(req, res)=>{
             return res.status(401).json({ status: "error", message: 'You have already joined' });
         }
         await db.query(`INSERT INTO ContestParticipants (contest_id, participant_id, submission_status) 
-            VALUES (?, ?, ?, ?)`,[contest_id, participant[0].participant_id,'not submitted'])
+            VALUES (?, ?, ?)`,[contest_id, participant[0].participant_id,'not submitted'])
         return res.status(200).json({ status: "success", message: 'join successfully' });
     } catch (error) {
         console.error(error);
