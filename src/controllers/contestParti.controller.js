@@ -155,7 +155,6 @@ exports.getParticipantContest = async(req, res)=>{
             SELECT 
                 t1.*, 
                 t2.contest_name, 
-                t2.contest_image, 
                 t2.start_date, 
                 t2.end_date 
             FROM 
