@@ -151,7 +151,35 @@ exports.getParticipantContest = async(req, res)=>{
             return res.status(401).json({ status: "error", message: 'You have no permission' });
         }
         const [participant] = await db.query("SELECT participant_id FROM Participants WHERE user_id = ?",[user_id])
-        const [contest] = await db.query("SELECT * FROM ContestParticipants WHERE participant_id = ? ORDER BY submission_status ASC",[participant[0].participant_id])
+        const [contest] = await db.query(`
+            SELECT 
+                t1.*, 
+                t2.contest_name, 
+                t2.contest_image, 
+                t2.start_date, 
+                t2.end_date 
+            FROM 
+                ContestParticipants AS t1
+            JOIN 
+                Contests AS t2 
+            ON 
+                t1.contest_id = t2.contest_id
+            WHERE 
+                participant_id = ? 
+            ORDER BY 
+                CASE
+                    WHEN t1.submission_status = 'not_submitted' THEN 1
+                    ELSE 2
+                END,
+                CASE
+                    WHEN NOW() BETWEEN t2.start_date AND t2.end_date THEN 1
+                    WHEN NOW() < t2.start_date THEN 2
+                    ELSE 3
+                END,
+                t2.start_date, 
+                t2.end_date
+        `, [participant[0].participant_id]);
+        
         return res.status(200).json({ status: "success",data: contest});
     } catch (error) {
         console.error(error);
