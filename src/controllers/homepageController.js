@@ -83,14 +83,20 @@ exports.getOngoing = async (req, res) => {
       if (role === 'student') {
         const [prizes] = await db.query('SELECT t2.prizes FROM Users AS t1 JOIN Participants AS t2 ON t1.user_id = t2.user_id WHERE t1.user_id = ?', [user_id]);
   
-        const query = `SELECT AVG(grade) AS average, COUNT(participant_id) AS count
-                       FROM ContestParticipants
-                       WHERE participant_id IN (SELECT participant_id FROM Participants WHERE user_id = ?)`;
+        const query = `
+        SELECT AVG(grade) AS average, COUNT(participant_id) AS count
+        FROM ContestParticipants
+        WHERE participant_id IN (
+          SELECT participant_id
+          FROM Participants
+          WHERE user_id = ?
+        )
+      `;
         const [info] = await db.query(query, [user_id]);
-        console.log(prizes);
+        console.log(info);
         const prizesCount = prizes[0].prizes? info[0].average : 0;
         const averageGrade = info[0].average ? info[0].average : 0;
-        const participationCount = info[0].length ? info[0].count : 0;
+        const participationCount = info[0].count ? info[0].count : 0;
   
         return res.status(200).json({
           status: "success",
