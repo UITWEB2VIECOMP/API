@@ -124,7 +124,7 @@ exports.getSubmitted = async(req, res)=>{
     const {contest_id, contest_participant_id} = req.params
     const {user_id, role} = req.headers
     try {
-        if(role !== 'corrporation'){
+        if(role !== 'corporation'){
             return res.status(401).json({ status: "error", message: 'You have no permission' });
         }
         const [corporation] = await db.query("SELECT corporation_id FROM Corporations WHERE user_id = ?",[user_id])
@@ -134,7 +134,7 @@ exports.getSubmitted = async(req, res)=>{
         }
         const [submission] = await db.query(`SELECT t1.*, t2.* FROM ContestQuestions AS t1
             JOIN Submissions AS t2 ON t1.question_id = t2.question_id 
-            WHERE t1.contest_id = ? AND t2.contest_participant_id = ?`)
+            WHERE t1.contest_id = ? AND t2.contest_participant_id = ?`,[contest_id,contest_participant_id ])
         return res.status(200).json({ status: "success", data:submission});
     } catch (error) {
         console.error(error);

@@ -3,7 +3,7 @@ const {addContest, getCorpManageInfo, contestPage,
     changeContestImage, changeContestName, changeContestDescription, changePrizeDescription, changeDate, deleteContest} = require('../controllers/contestController')
 const {checkAuth} = require('../../middleware/checkAuth')
 const router = express.Router()
-const {joinContest, getQuestions, submitContest, getParticipantContest} = require('../controllers/contestParti.controller')
+const {joinContest, getQuestions, submitContest, getParticipantContest, getSubmitted} = require('../controllers/contestParti.controller')
 const {uploadImg, multerErrorHandling, uploadFiles}=require('../../middleware/multer')
 router.use(checkAuth)
 
@@ -18,6 +18,7 @@ router.post('/change-date/:contest_id',changeDate)
 router.post('/delete/:contest_id',deleteContest)
 router.post('/join-contest/:contest_id',joinContest)
 router.get('/do-contest/:contest_id',getQuestions)
+router.get('/get-submitted/:contest_id/:contest_participant_id',getSubmitted)
 router.post('/submission',uploadFiles, submitContest)
 router.get('/get-your-contest',getParticipantContest)
 
