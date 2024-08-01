@@ -171,12 +171,13 @@ exports.contestPage = async(req, res)=>{
             const [corporation] = await db.query("SELECT corporation_id FROM Corporations WHERE user_id = ?", [user_id])
             return res.status(200).json({status:"success", data: contest[0], hosted: corporation[0].corporation_id === contest[0].corporation_id})
         }else{
-            const [participated] =await db.query(`SELECT contest_participant_id  
+            const [participated] =await db.query(`SELECT contest_participant_id, t1.submission_status  
                 FROM ContestParticipants AS t1
                 JOIN Participants AS t2 ON t1.participant_id   =  t2.participant_id
                 JOIN Users AS t3 ON t2.user_id =  t3.user_id 
                 WHERE t1.contest_id = ? and t3. user_id =?`, [contest_id, user_id])
-            return res.status(200).json({status:"success", data: contest[0] , participated: participated.length !==0})
+            return res.status(200).json({status:"success", data: contest[0] , 
+                participated: participated.length !==0, submitted:participated[0].submission_status})
         }
     }catch(error){
         console.error(error);   
@@ -355,6 +356,8 @@ exports.deleteContest=async(req, res)=>{
         if (role !== "corporation" || check.length === 0) {
             return res.status(400).json({ status: 'error', message: 'No permission' });
         }
+        const image = await db.query(`SELECT contest_image FROM Contests WHERE contest_id = ?`, contest_id)
+        await deleteImage(image[0].contest_image,'contestimg')
         await db.query(`DELETE FROM ContestQuestions WHERE contest_id = ?`,[contest_id])
         await db.query(`DELETE FROM Submissions WHERE contest_id = ?`,[contest_id])
         await db.query(`DELETE FROM ContestParticipants WHERE contest_id = ?`,[contest_id])

@@ -56,6 +56,7 @@ exports.getOngoing = async (req, res) => {
       if (!participant.length) {
         return res.status(404).json({ status: "error", message: 'Participant not found' });
       }
+      const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
       const [contest] = await db.query(`
         SELECT c.*, corp.corp_name, u.avatar
         FROM Contests AS c
@@ -64,8 +65,8 @@ exports.getOngoing = async (req, res) => {
         JOIN Corporations AS corp 
         ON c.corporation_id = corp.corporation_id
         JOIN Users AS u ON corp.user_id = u.user_id
-        WHERE cp.participant_id = ?`, 
-        [participant[0].participant_id]
+        WHERE cp.participant_id = ? AND ? BETWEEN c.start_date AND c.end_date`, 
+        [participant[0].participant_id, currentDate]
     );
     
       return res.status(200).json({ status: "success", data: contest||[] });

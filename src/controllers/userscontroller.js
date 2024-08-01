@@ -148,10 +148,7 @@ exports.uploadAvatar = async(req, res)=>{
         if(user[0].avatar !== 'https://firebasestorage.googleapis.com/v0/b/viecontest-e4a3c.appspot.com/o/avatar%2F76336a09-ca5d-4fbb-a294-d44e4cc54999?alt=media&token=4713c098-e832-4224-8657-d296bc658171'){
             await deleteImage(user[0].avatar,'avatar')
         }
-        const file = {
-            type: req.file.mimetype,
-            buffer: req.file.buffer
-        }
+x
         const buildImage = await uploadImage(file,'avatar')
         await db.query('UPDATE Users SET avatar = ? WHERE user_id = ?',[buildImage, user_id])
         res.status(200).json({status:'success', message:"avatar is updated successfully"})

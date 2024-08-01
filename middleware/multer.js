@@ -19,11 +19,14 @@ const CheckImage=(file, cb)=>{
         cb(new multer.MulterError("LIMIT_UNEXPECTED_FILE"), false)
     }
 }
-const uploadFile = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 5000000},
+const uploadFiles = multer({
+    storage:  multer.memoryStorage(),
+    limits: { fileSize: 50000000, files: 10 }, 
+    fileFilter: function (req, file, cb) {
+        cb(null, true);
+    }
+}).any();
 
-}).array('file')
 const multerErrorHandling=(error, req, res, next)=>{
     if(error instanceof multer.MulterError){
         if (error.code === "LIMIT_FILE_SIZE"){
@@ -38,4 +41,4 @@ const multerErrorHandling=(error, req, res, next)=>{
         
     }
 }
-module.exports={uploadImg, multerErrorHandling, uploadFile}
+module.exports={uploadImg, multerErrorHandling, uploadFiles}
