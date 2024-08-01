@@ -61,7 +61,7 @@ exports.getQuestions = async(req, res)=>{
     }finally{
         db.release()
     }
-}
+} 
 const uploadFiles = async(file, type) => {
     const storageFB = getStorage();
     await signInWithEmailAndPassword(auth, process.env.FIREBASE_USER, process.env.FIREBASE_AUTH);
@@ -151,7 +151,7 @@ exports.getParticipantContest = async(req, res)=>{
             return res.status(401).json({ status: "error", message: 'You have no permission' });
         }
         const [participant] = await db.query("SELECT participant_id FROM Participants WHERE user_id = ?",[user_id])
-        const [contest] = await db.query("SELECT * FROM ContestParticipants WHERE participant_id = ?",[participant[0].participant_id])
+        const [contest] = await db.query("SELECT * FROM ContestParticipants WHERE participant_id = ? ORDER BY submission_status ASC",[participant[0].participant_id])
         return res.status(200).json({ status: "success",data: contest});
     } catch (error) {
         console.error(error);
