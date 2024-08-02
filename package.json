@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "gen_api_doc": "apidoc -i src/routes/ -o ./public/docs/"
   },
   "repository": {
     "type": "git",
@@ -15,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "apidoc": "^1.2.0",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -28,5 +30,13 @@
     "nodemailer": "^6.9.14",
     "nodemon": "^3.1.4",
     "uuid": "^10.0.0"
+  },"apidoc":{
+    "name": "VieContest",
+    "version": "1.0.0",
+    "description": "API DOCUMENT",
+    "title": "VieContest API",
+    "url" : "http://localhost:5001",
+    "sampleUrl": "http://localhost:5001"
+
   }
 }

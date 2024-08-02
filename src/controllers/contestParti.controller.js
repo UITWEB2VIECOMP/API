@@ -49,7 +49,7 @@ exports.getQuestions = async(req, res)=>{
         const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
         const [check2] = await db.query('SELECT * FROM Contests  WHERE contest_id = ? AND ? BETWEEN start_date AND end_date', [contest_id, currentDate])
         if(check2.length === 0){
-            return res.status(401).json({ status: "error", message: 'Contest havenot started yet' });
+            return res.status(401).json({ status: "error", message: 'Contest havenot started yet or expired' });
         }
         const [questions] = await db.query(`SELECT t1.*, t2.type_name FROM ContestQuestions AS t1
             JOIN QuestionTypes AS t2 ON t1.question_type_id = t2.question_type_id
@@ -187,3 +187,6 @@ exports.getParticipantContest = async(req, res)=>{
         db.release()
     }
 }
+exports.grading = async(req, res)=>[
+    
+]

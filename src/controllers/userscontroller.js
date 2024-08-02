@@ -109,7 +109,7 @@ exports.changeDescription= async(req, res)=>{
             return res.status(400).json({ status: 'error', message: 'Missing value provided' });
         }
         await db.query("UPDATE Corporations SET description = ? WHERE user_id = ?",[description, user_id])
-        return res.status(200).json({status: "success", message: "Address change successfully!"})
+        return res.status(200).json({status: "success", message: "description change successfully!"})
     }catch (error) {
         console.error(error);
         return res.status(500).json({status: "error", message: 'Internal server error' });
