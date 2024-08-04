@@ -94,7 +94,10 @@ exports.submitContest = async(req, res)=>{
         Object.entries(jsAnswers).forEach(async([key, data]) => {
             if (data.type === "file") {
                 const file = req.files.find(file => file.fieldname === key)
-                const fileUrl = await uploadFiles(file, "fileSubmission");
+                let fileUrl
+                if(file){
+                    fileUrl = await uploadFiles(file, "fileSubmission");
+                }
                 await db.query(`INSERT INTO Submissions 
                     (contest_id, contest_participant_id, question_id, submission_type_id, file_path ) 
                     VALUES (?, ?, ?, ?, ?)`,[contest_id, contest_participant_id,key, 2, fileUrl])
@@ -187,6 +190,44 @@ exports.getParticipantContest = async(req, res)=>{
         db.release()
     }
 }
-exports.grading = async(req, res)=>[
-    
-]
+exports.grading = async (req, res) => {
+    const db = await pool.getConnection();
+    try {
+        const { user_id, role } = req.headers;
+        const { grade, contest_participant_id, contest_id } = req.body;
+
+        const [check] = await db.query(
+            `SELECT contest_name FROM Contests AS t1
+            JOIN Corporations AS t2 ON t1.corporation_id = t2.corporation_id 
+            JOIN Users AS t3 ON t2.user_id = t3.user_id
+            WHERE t1.contest_id = ? AND t3.user_id = ?`,
+            [contest_id, user_id]
+        );
+
+        if (role !== 'corporation' || check.length === 0) {
+            return res.status(403).json({ status: 'error', message: 'You do not have permission to perform this action' });
+        }
+
+        if (grade === undefined || grade === null) {
+            return res.status(400).json({ status: 'error', message: 'Grade is required' });
+        }
+
+        const result = await db.query(
+            `UPDATE ContestParticipants
+            SET grade = ?
+            WHERE contest_id = ? AND contest_participant_id = ?`,
+            [grade, contest_id, contest_participant_id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ status: 'error', message: 'Contest participant not found' });
+        }
+
+        return res.status(200).json({ status: 'success', message: 'Grading updated successfully' });
+    } catch (error) {
+        console.error('Error during grading operation:', error);
+        return res.status(500).json({ status: 'error', message: 'Internal server error' });
+    } finally {
+        db.release();
+    }
+};
