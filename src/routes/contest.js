@@ -667,6 +667,98 @@ router.post('/join-contest/:contest_id',joinContest)
  *     }
  */
 router.get('/do-contest/:contest_id',getQuestions)
+
+/**
+ * @api {get} /api/contest/get-submitted/:contest_id/:contest_participant_id Get participant answers for grading   
+* @apiVersion 1.0.0
+ * @apiName getSubmitted
+ * @apiGroup Contest
+ * @apiPermission Created Corporation
+ * 
+ * @apiDescription Get participant answers for grading   
+ * 
+ * @apiHeader {String} user_id User's unique ID.
+ * @apiHeader {String} role User's role 
+ * @apiQuery {Number} contest_id Contest unique ID
+ * @apiQuery {Number} contest_participant_id Participant who joining this contest unique ID
+ * 
+ * @apiSuccess {String} status Status of the operation.
+ * @apiSuccess {Array} submission Array of questions and its answers
+ * 
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *    {
+ *    "status": "success",
+ *    "data": [
+ *            {
+ *                "question_id": 391,
+ *                "contest_id": 7,
+ *                "question_type_id": 1,
+ *                "question_text": "eqweqw",
+ *                "question_image": null,
+ *                "option_multiple_choice": "{\"qa\":\"das\",\"qb\":\"ad\",\"qc\":\"fwe\",\"qd\":\"eqw\"}",
+ *                "submission_id": 17,
+ *                "contest_participant_id": 4,
+ *                "submission_type_id": 3,
+ *                "multiple_choice_answer": "qa",
+ *                "submission_text": null,
+ *                "file_path": null,
+ *                "submission_date": "2024-08-03T20:28:08.000Z"
+ *            },
+ *            {
+ *                "question_id": 392,
+ *                "contest_id": 7,
+ *                "question_type_id": 2,
+ *                "question_text": "eqwewqe",
+ *                "question_image": null,
+ *                "option_multiple_choice": null,
+ *                "submission_id": 18,
+ *                 "contest_participant_id": 4,
+ *                 "submission_type_id": 1,
+ *                "multiple_choice_answer": null,
+ *                "submission_text": "asdasdsa",
+ *                "file_path": null,
+ *                "submission_date": "2024-08-03T20:28:08.000Z"
+ *            },
+ *            {
+ *                "question_id": 393,
+ *                "contest_id": 7,
+ *                "question_type_id": 3,
+ *                "question_text": "eqwewq",
+ *                "question_image": null,
+ *                "option_multiple_choice": null,
+ *                "submission_id": 19,
+ *                "contest_participant_id": 4,
+ *                "submission_type_id": 2,
+ *                "multiple_choice_answer": null,
+ *                "submission_text": null,
+ *                "file_path": "https://firebasestorage.googleapis.com/v0/b/viecontest-e4a3c.appspot.com/o/fileSubmission%2F83f31e6b-4ee1-41b7-ab30-1b0dda66e6b4?alt=media&token=52e167f3-6c4d-4673-9c7c-292fdecabb8a",
+ *                "submission_date": "2024-08-03T20:28:10.000Z"
+ *            }
+ *        ]
+ *    }
+ * 
+ * @apiError NoPermission User have no permission(Only Corporation who hosted this contest)
+ * @apiError UserNotLoggedIn The user is not logged in.
+ * @apiError UserNotExist The user does not exist.
+ *     
+ * @apiErrorExample Error-Response:
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "No permission"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "User is not login"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "user is not exist"
+ *     }
+ */
 router.get('/get-submitted/:contest_id/:contest_participant_id',getSubmitted)
 
 /**
@@ -796,6 +888,65 @@ router.post('/submission',uploadFiles, submitContest)
  */
 router.get('/get-your-contest',getParticipantContest)
 
+/**
+ * @api {post} /api/contest/grading Grading/evaluating Participant answers
+* @apiVersion 1.0.0
+ * @apiName grading
+ * @apiGroup Contest
+ * @apiPermission Created Corporation
+ * 
+ * @apiDescription Grading/evaluating Participant answers
+ * 
+ * @apiHeader {String} user_id User's unique ID.
+ * @apiHeader {String} role User's role 
+ * @apiParams {Number} contest_id Contest unique ID
+ * @apiParams {Number} contest_participant_id Participant who joining this contest unique ID
+ * @apiParams {Number} grade Grade of Participant
+ *  
+ * @apiSuccess {String} status Status of the operation.
+ * @apiSuccess {String} message Response Message
+ * 
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *   {
+ *       "status": "success",
+ *       "message": 'Grading updated successfully'
+ *   }
+ * 
+ * 
+ * @apiError NoPermission User have no permission(Only Corporation who created this contest can do it)
+ * @apiError FieldMissing Grade field is missing
+ * @apiError InvalidContestParticipant contest_participant_id is invalid
+ * @apiError UserNotLoggedIn The user is not logged in.
+ * @apiError UserNotExist The user does not exist.
+ *     
+ * @apiErrorExample Error-Response:
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": 'You do not have permission to perform this action'
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": 'Grade is required'
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     { 
+ *        "status": 'error', 
+ *        "message": 'Contest participant not found' 
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "User is not login"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "user is not exist"
+ *     }
+ */
 router.post('/grading',grading)
 
 
