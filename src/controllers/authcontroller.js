@@ -249,7 +249,7 @@ exports.login = async(req, res)=>{
         };
         const token = jwt.sign(payload, process.env.JWTAUTHKEY, { expiresIn: process.env.JWTEXPIREDAYS });
 
-        return res.status(200).json({ status: 'success', data: { token: token } });
+        return res.status(200).json({ status: 'success', data: {role: role[0].role_name  , token: token } });
     }catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Internal server error' });

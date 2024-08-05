@@ -20,8 +20,14 @@ exports.checkAuth= async(req, res, next)=>{
         req.headers.role = role
         next();
     }catch (error) {
-        console.error(error);
-        return res.status(500).json({status: "error", message: 'Internal server error' });
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ status: "error", message: 'Token has expired' });
+        } else if (error.name === 'JsonWebTokenError') {
+            return res.status(400).json({ status: "error", message: 'Invalid token' });
+        } else {
+            console.error(error);
+            return res.status(500).json({ status: "error", message: 'Internal server error' });
+        }
     }finally{
         db.release()
     }
