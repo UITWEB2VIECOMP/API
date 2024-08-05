@@ -30,13 +30,13 @@
     "nodemailer": "^6.9.14",
     "nodemon": "^3.1.4",
     "uuid": "^10.0.0"
-  },"apidoc":{
+  },
+  "apidoc": {
     "name": "VieContest",
     "version": "1.0.0",
     "description": "API DOCUMENT",
     "title": "VieContest API",
-    "url" : "http://localhost:5001",
+    "url": "http://localhost:5001",
     "sampleUrl": "http://localhost:5001"
-
   }
 }

@@ -3,7 +3,9 @@ const bcrypt = require('bcrypt')
 const sendEmail = require('./sendEmail');
 const mysql = require('mysql2')
 const crypto = require('crypto');
-
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+dotenv.config()
 
 exports.register = async(req, res)=>{
     const {firstname, lastname,DOB, email, password, passwordConfirm} = req.body
@@ -241,8 +243,13 @@ exports.login = async(req, res)=>{
             return res.status(400).json({status:"error",message:"An email is sent to your account please check"})
         }
         let [role] = await db.query('SELECT role_name FROM Roles WHERE role_id = ?', [emailCheck[0].role_id]);
-        return res.status(200).json({status:'success', data:{user_id: emailCheck[0].user_id, role: role[0].role_name}})
-        
+        const payload = {
+            user_id: emailCheck[0].user_id,
+            role: role[0].role_name,
+        };
+        const token = jwt.sign(payload, process.env.JWTAUTHKEY, { expiresIn: process.env.JWTEXPIREDAYS });
+
+        return res.status(200).json({ status: 'success', data: { token: token } });
     }catch (error) {
         console.error(error);
         return res.status(500).json({ message: 'Internal server error' });
