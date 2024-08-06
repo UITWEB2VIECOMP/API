@@ -134,9 +134,9 @@ exports.getCorpManageInfo = async (req, res) => {
                 JOIN Submissions AS t2 ON t1.contest_participant_id = t2.contest_participant_id
                 WHERE t1.submission_status = ? 
                 AND t1.contest_id = ?
-                AND GRADE = ?
+                AND t1.grade IS NULL
                 GROUP BY t1.contest_participant_id
-            `, ["submitted", contest_id, null]);
+            `, ["submitted", contest_id]);
         
             console.log(`Participants for contest ${contest_id}:`, participants);
         
