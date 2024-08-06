@@ -14,8 +14,7 @@ router.use(checkAuth)
  *
  * @apiDescription Change user avatar.
  *
- * @apiHeader {String} user_id User ID.
- * @apiHeader {String} role User role.
+ * @apiHeader {String} token authentication token.
  * @apiBody {File} avatar Image file (only 1 and <= 5MB).
  *
  * @apiExample Example usage:
@@ -36,7 +35,9 @@ router.use(checkAuth)
  * @apiError FileTooLarge File is too large (>5MB).
  * @apiError FileLimitReached File limit reached.
  * @apiError WrongFileType Wrong file type.
- *
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
+ * 
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
  *     {
@@ -63,6 +64,16 @@ router.use(checkAuth)
  *       "status": "error",
  *       "message": "Wrong file type"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.post('/change-avatar', uploadImg, uploadAvatar);
 /**
@@ -74,8 +85,7 @@ router.post('/change-avatar', uploadImg, uploadAvatar);
  *
  * @apiDescription Change user password.
  *
- * @apiHeader {String} user_id User ID.
- * @apiHeader {String} role User role.
+ * @apiHeader {String} token authentication token.
  * @apiBody {String} old_password Old password.
  * @apiBody {String} new_password New password.
  * @apiBody {String} c_new_password Confirm new password.
@@ -97,6 +107,8 @@ router.post('/change-avatar', uploadImg, uploadAvatar);
  * @apiError UserNotExist User does not exist.
  * @apiError PasswordIncorrect Old password is incorrect.
  * @apiError PasswordMismatch Confirm password does not match.
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
  *
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
@@ -119,6 +131,16 @@ router.post('/change-avatar', uploadImg, uploadAvatar);
  *       "status": "error",
  *       "message": "Confirm password does not match!"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.post('/change-password', changePassword)
 /**
@@ -130,8 +152,7 @@ router.post('/change-password', changePassword)
  *
  * @apiDescription Get user profile information.
  *
- * @apiHeader {String} user_id User ID.
- * @apiHeader {String} role User role (student or corporation).
+ * @apiHeader {String} token authentication token.
  *
  * @apiExample Example usage:
  * curl -i http://localhost:3000/api/users/get-user
@@ -167,6 +188,8 @@ router.post('/change-password', changePassword)
  *
  * @apiError UserNotLoggedIn User is not logged in.
  * @apiError UserNotExist User does not exist.
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
  *
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
@@ -179,6 +202,16 @@ router.post('/change-password', changePassword)
  *       "status": "error",
  *       "message": "User does not exist"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.get('/get-user', getUser)
 /**
@@ -190,8 +223,7 @@ router.get('/get-user', getUser)
  *
  * @apiDescription Change user's first name and last name.
  *
- * @apiHeader {String} user_id User ID.
- * @apiHeader {String} role User role.
+ * @apiHeader {String} token authentication token.
  * @apiBody {String} first_name New first name.
  * @apiBody {String} last_name New last name.
  *
@@ -211,7 +243,9 @@ router.get('/get-user', getUser)
  * @apiError UserNotLoggedIn User is not logged in.
  * @apiError UserNotExist User does not exist.
  * @apiError MissingValue Missing value provided.
- *
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
+ * 
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
  *     {
@@ -228,6 +262,16 @@ router.get('/get-user', getUser)
  *       "status": "error",
  *       "message": "Missing value provided"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.post('/change-name', changeName)
 
@@ -240,8 +284,7 @@ router.post('/change-name', changeName)
  *
  * @apiDescription Change user's date of birth (only for participants).
  *
- * @apiHeader {String} user_id User ID.
- * @apiHeader {String} role User role.
+ * @apiHeader {String} token authentication token.
  * @apiBody {String} dob New date of birth.
  *
  * @apiExample Example usage:
@@ -260,6 +303,8 @@ router.post('/change-name', changeName)
  * @apiError UserNotLoggedIn User is not logged in.
  * @apiError UserNotExist User does not exist.
  * @apiError MissingValue Missing value provided.
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
  *
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
@@ -277,6 +322,16 @@ router.post('/change-name', changeName)
  *       "status": "error",
  *       "message": "Missing value provided"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.post('/change-dob', changeDOB)
 
@@ -289,8 +344,7 @@ router.post('/change-dob', changeDOB)
  *
  * @apiDescription Change corporation's address (only for corporations).
  *
- * @apiHeader {String} user_id User ID.
- * @apiHeader {String} role User role.
+ * @apiHeader {String} token authentication token.
  * @apiBody {String} address New address.
  *
  * @apiExample Example usage:
@@ -309,6 +363,8 @@ router.post('/change-dob', changeDOB)
  * @apiError UserNotLoggedIn User is not logged in.
  * @apiError UserNotExist User does not exist.
  * @apiError MissingValue Missing value provided.
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
  *
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
@@ -326,6 +382,16 @@ router.post('/change-dob', changeDOB)
  *       "status": "error",
  *       "message": "Missing value provided"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.post('/change-address', changeAddress)
 
@@ -338,8 +404,7 @@ router.post('/change-address', changeAddress)
  *
  * @apiDescription Change corporation's contact information (only for corporations).
  *
- * @apiHeader {String} user_id User ID.
- * @apiHeader {String} role User role.
+ * @apiHeader {String} token authentication token.
  * @apiBody {String} contact_info New contact information.
  *
  * @apiExample Example usage:
@@ -358,6 +423,8 @@ router.post('/change-address', changeAddress)
  * @apiError UserNotLoggedIn User is not logged in.
  * @apiError UserNotExist User does not exist.
  * @apiError MissingValue Missing value provided.
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
  *
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
@@ -375,6 +442,16 @@ router.post('/change-address', changeAddress)
  *       "status": "error",
  *       "message": "Missing value provided"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.post('/change-contact', changeContactInfo)
 
@@ -387,8 +464,7 @@ router.post('/change-contact', changeContactInfo)
  *
  * @apiDescription Change corporation's description (only for corporations).
  *
- * @apiHeader {String} user_id User ID.
- * @apiHeader {String} role User role.
+ * @apiHeader {String} token authentication token.  
  * @apiBody {String} description New description.
  *
  * @apiExample Example usage:
@@ -407,6 +483,8 @@ router.post('/change-contact', changeContactInfo)
  * @apiError UserNotLoggedIn User is not logged in.
  * @apiError UserNotExist User does not exist.
  * @apiError MissingValue Missing value provided.
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
  *
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
@@ -423,6 +501,16 @@ router.post('/change-contact', changeContactInfo)
  *     {
  *       "status": "error",
  *       "message": "Missing value provided"
+ *     }
+  *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
  *     }
  */
 router.post('/change-description', changeDescription)

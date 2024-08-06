@@ -102,7 +102,7 @@ router.post('/register-corp', registerCorp)
  *
  * @apiSuccess {String} status Status of the request.
  * @apiSuccess {Object} data User data.
- * @apiSuccess {String} data.user_id User ID.
+ * @apiSuccess {String} data.token authentication token.
  * @apiSuccess {String} data.role User role.
  *
  * @apiSuccessExample Success-Response:
@@ -110,7 +110,7 @@ router.post('/register-corp', registerCorp)
  *     {
  *       "status": "success",
  *       "data": {
- *         "user_id": "123",
+ *         "token": "token",
  *         "role": "user"
  *       }
  *     }
@@ -146,8 +146,8 @@ router.post('/login', login)
  *
  * @apiDescription Verify a user's email.
  *
- * @apiParam {String} id User ID.
- * @apiParam {String} token Verification token.
+ * @apiParam {Number} id User ID.
+ * @apiQuery {String} token Verification token.
  *
  * @apiExample Example usage:
  * curl -i http://localhost:3000/api/auth/123/verify/abcd1234

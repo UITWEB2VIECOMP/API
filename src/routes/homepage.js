@@ -14,7 +14,7 @@ router.use(checkAuth);
  *
  * @apiDescription Get the list of ongoing contests for the authenticated user.
  *
- * @apiHeader {String} user_id User's unique ID.
+ * @apiHeader {String} token authentication token.
  *
  * @apiExample Example usage:
  * curl -i http://localhost:3000/api/homepage/get-ongoing -H "user_id: 123"
@@ -31,7 +31,9 @@ router.use(checkAuth);
  *
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
- *
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
+ * 
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
  *     {
@@ -42,6 +44,16 @@ router.use(checkAuth);
  *     {
  *       "status": "error",
  *       "message": "user is not exist"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
  *     }
  */
 router.get('/get-ongoing', getOngoing);
@@ -55,7 +67,7 @@ router.get('/get-ongoing', getOngoing);
  *
  * @apiDescription Get the list of upcoming contests for the authenticated user.
  *
- * @apiHeader {String} user_id User's unique ID.
+ * @apiHeader {String} token authentication token.
  *
  * @apiExample Example usage:
  * curl -i http://localhost:3000/api/homepage/get-upcoming -H "user_id: 123"
@@ -72,7 +84,9 @@ router.get('/get-ongoing', getOngoing);
  *
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
- *
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
+ * 
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
  *     {
@@ -83,6 +97,16 @@ router.get('/get-ongoing', getOngoing);
  *     {
  *       "status": "error",
  *       "message": "user is not exist"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
  *     }
  */
 router.get('/get-upcoming', getUpcoming);
@@ -96,7 +120,7 @@ router.get('/get-upcoming', getUpcoming);
  *
  * @apiDescription Get the home info for the authenticated user.
  *
- * @apiHeader {String} user_id User's unique ID.
+ * @apiHeader {String} token authentication token.
  *
  * @apiExample Example usage:
  * curl -i http://localhost:3000/api/homepage/home-info -H "user_id: 123"
@@ -130,6 +154,8 @@ router.get('/get-upcoming', getUpcoming);
  *
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
  *
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
@@ -141,6 +167,16 @@ router.get('/get-upcoming', getUpcoming);
  *     {
  *       "status": "error",
  *       "message": "user is not exist"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
  *     }
  */
 router.get('/home-info', getHomeInfo);
@@ -154,7 +190,7 @@ router.get('/home-info', getHomeInfo);
  *
  * @apiDescription Get the list of contests the user is participating in.
  *
- * @apiHeader {String} user_id User's unique ID.
+ * @apiHeader {String} token authentication token.
  *
  * @apiExample Example usage:
  * curl -i http://localhost:3000/api/homepage/get-participating -H "user_id: 123"
@@ -171,7 +207,9 @@ router.get('/home-info', getHomeInfo);
  *
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
- *
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
+ * 
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
  *     {
@@ -182,6 +220,16 @@ router.get('/home-info', getHomeInfo);
  *     {
  *       "status": "error",
  *       "message": "user is not exist"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
  *     }
  */
 router.get('/get-participating', getParticipating);

@@ -16,9 +16,7 @@ router.use(checkAuth)
  * 
  * @apiDescription Add or Create new contest by Corporation 
  * 
- * @apiHeader {String} user_id User's unique ID.
- * @apiHeader {String} role User's role (must be 'corporation').
- * 
+ * @apiHeader {String} token authentication token.
  *  
  * @apiParam (Body) {String} contest_name Name of the contest.
  * @apiParam (Body) {String} contest_description Description of the contest.
@@ -44,6 +42,8 @@ router.use(checkAuth)
  * @apiError RequiredFieldUnfound Image or Prize or name or date fields is unfound.
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
  *     
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 401 Bad Request
@@ -71,6 +71,16 @@ router.use(checkAuth)
  *       "status": "error",
  *       "message": "user is not exist"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.post('/add-contest', uploadImg, addContest)
 
@@ -83,8 +93,7 @@ router.post('/add-contest', uploadImg, addContest)
  * 
  * @apiDescription Get information for contest management page of corporation
  * 
- * @apiHeader {String} user_id User's unique ID.
- * @apiHeader {String} role User's role (must be 'corporation').
+ * @apiHeader {String} token authentication token.
  * 
  * 
  * @apiSuccess {String} status Status of the operation.
@@ -115,7 +124,9 @@ router.post('/add-contest', uploadImg, addContest)
  * @apiError NotHavePermission Other role that not Corporation try to create contest.
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
- *     
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
+ * 
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 401 Bad Request
  *      { 
@@ -132,7 +143,16 @@ router.post('/add-contest', uploadImg, addContest)
  *       "status": "error",
  *       "message": "user is not exist"
  *     }
- */
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     } */
 router.get('/get-manage-info',getCorpManageInfo)
 
 /**
@@ -144,8 +164,7 @@ router.get('/get-manage-info',getCorpManageInfo)
  * 
  * @apiDescription Get data for contest page
  * 
- * @apiHeader {String} user_id User's unique ID.
- * @apiHeader {String} role User's role 
+ * @apiHeader {String} token authentication token.
  * @apiQuery {Number} contest_id Contest unique ID
  * 
  * @apiSuccess {String} status Status of the operation.
@@ -197,7 +216,9 @@ router.get('/get-manage-info',getCorpManageInfo)
  *
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
- *     
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.    
+ * 
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
  *     {
@@ -208,6 +229,16 @@ router.get('/get-manage-info',getCorpManageInfo)
  *     {
  *       "status": "error",
  *       "message": "user is not exist"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
  *     }
  */
 router.get('/get-contest/:contest_id',contestPage)
@@ -221,8 +252,7 @@ router.get('/get-contest/:contest_id',contestPage)
  * 
  * @apiDescription Change name of a contest 
  * 
- * @apiHeader {String} user_id User's unique ID.
- * @apiHeader {String} role User's role 
+ * @apiHeader {String} token authentication token.
  * @apiParams {String} contest_name Contest name
  * @apiQuery  {Number} contest_id Contest unique ID
  * 
@@ -240,6 +270,8 @@ router.get('/get-contest/:contest_id',contestPage)
  * @apiError NoPermission User have no permission(Only corporation who created this contest can do this)
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
  *     
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
@@ -262,6 +294,16 @@ router.get('/get-contest/:contest_id',contestPage)
  *       "status": "error",
  *       "message": "user is not exist"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.post('/change-name/:contest_id',changeContestName)
 
@@ -274,8 +316,7 @@ router.post('/change-name/:contest_id',changeContestName)
  * 
  * @apiDescription Change image of a contest 
  * 
- * @apiHeader {String} user_id User's unique ID.
- * @apiHeader {String} role User's role 
+ * @apiHeader {String} token authentication token.
  * @apiQuery {Number} contest_id Contest unique ID
  * @apiParams {File} file Contest image
  * 
@@ -293,6 +334,8 @@ router.post('/change-name/:contest_id',changeContestName)
  * @apiError NoPermission User have no permission(Only corporation who created this contest can do this)
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
  *     
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
@@ -315,6 +358,16 @@ router.post('/change-name/:contest_id',changeContestName)
  *       "status": "error",
  *       "message": "user is not exist"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.post('/change-image/:contest_id', uploadImg,changeContestImage)
 
@@ -327,8 +380,7 @@ router.post('/change-image/:contest_id', uploadImg,changeContestImage)
  * 
  * @apiDescription Change description of a contest 
  * 
- * @apiHeader {String} user_id User's unique ID.
- * @apiHeader {String} role User's role 
+ * @apiHeader {String} token authentication token.
  * @apiQuery {Number} contest_id Contest unique ID
  * @apiParams {String} contest_description Contest description
  * 
@@ -346,6 +398,8 @@ router.post('/change-image/:contest_id', uploadImg,changeContestImage)
  * @apiError NoPermission User have no permission(Only corporation who created this contest can do this)
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
  *     
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
@@ -368,6 +422,16 @@ router.post('/change-image/:contest_id', uploadImg,changeContestImage)
  *       "status": "error",
  *       "message": "user is not exist"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+  *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.post('/change-description/:contest_id',changeContestDescription)
 
@@ -380,8 +444,7 @@ router.post('/change-description/:contest_id',changeContestDescription)
  * 
  * @apiDescription Change prize of a contest 
  * 
- * @apiHeader {String} user_id User's unique ID.
- * @apiHeader {String} role User's role 
+ * @apiHeader {String} token authentication token.
  * @apiQuery {Number} contest_id Contest unique ID
  * @apiParams {String} prizes_description Contest prize
  * 
@@ -399,6 +462,8 @@ router.post('/change-description/:contest_id',changeContestDescription)
  * @apiError NoPermission User have no permission(Only corporation who created this contest can do this)
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
  *     
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
@@ -421,6 +486,16 @@ router.post('/change-description/:contest_id',changeContestDescription)
  *       "status": "error",
  *       "message": "user is not exist"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+  *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.post('/change-prize/:contest_id',changePrizeDescription)
 
@@ -433,8 +508,7 @@ router.post('/change-prize/:contest_id',changePrizeDescription)
  * 
  * @apiDescription Change duration of a contest 
  * 
- * @apiHeader {String} user_id User's unique ID.
- * @apiHeader {String} role User's role 
+ * @apiHeader {String} token authentication token.
  * @apiQuery {Number} contest_id Contest unique ID
  * @apiParams {String} start_date Starting date of the contest
  * @apiParams {String} end_date Ending date of the contest
@@ -453,7 +527,9 @@ router.post('/change-prize/:contest_id',changePrizeDescription)
  * @apiError NoPermission User have no permission(Only corporation who created this contest can do this)
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
- *     
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
+ *      
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
  *     {
@@ -475,6 +551,16 @@ router.post('/change-prize/:contest_id',changePrizeDescription)
  *       "status": "error",
  *       "message": "user is not exist"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+  *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.post('/change-date/:contest_id',changeDate)
 
@@ -487,8 +573,7 @@ router.post('/change-date/:contest_id',changeDate)
  * 
  * @apiDescription Delete the contest 
  * 
- * @apiHeader {String} user_id User's unique ID.
- * @apiHeader {String} role User's role 
+ * @apiHeader {String} token authentication token.
  * @apiQuery {Number} contest_id Contest unique ID
  * 
  * @apiSuccess {String} status Status of the operation.
@@ -504,6 +589,8 @@ router.post('/change-date/:contest_id',changeDate)
  * @apiError NoPermission User have no permission(Only corporation who created this contest can do this)
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
  *     
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
@@ -521,6 +608,16 @@ router.post('/change-date/:contest_id',changeDate)
  *       "status": "error",
  *       "message": "user is not exist"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.post('/delete/:contest_id',deleteContest)
 
@@ -533,8 +630,7 @@ router.post('/delete/:contest_id',deleteContest)
  * 
  * @apiDescription Join the contest 
  * 
- * @apiHeader {String} user_id User's unique ID.
- * @apiHeader {String} role User's role 
+ * @apiHeader {String} token authentication token.
  * @apiQuery {Number} contest_id Contest unique ID
  * 
  * @apiSuccess {String} status Status of the operation.
@@ -551,6 +647,8 @@ router.post('/delete/:contest_id',deleteContest)
  * @apiError AlreadyJoin User already join this contest cannot join again
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
  *     
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
@@ -573,6 +671,16 @@ router.post('/delete/:contest_id',deleteContest)
  *       "status": "error",
  *       "message": "user is not exist"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.post('/join-contest/:contest_id',joinContest)
 
@@ -585,8 +693,7 @@ router.post('/join-contest/:contest_id',joinContest)
  * 
  * @apiDescription Get questions for doing contest page for the contest 
  * 
- * @apiHeader {String} user_id User's unique ID.
- * @apiHeader {String} role User's role 
+ * @apiHeader {String} token authentication token.
  * @apiQuery {Number} contest_id Contest unique ID
  * 
  * @apiSuccess {String} status Status of the operation.
@@ -633,6 +740,8 @@ router.post('/join-contest/:contest_id',joinContest)
  * @apiError InvalidDate Contest have not started or expired
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
  *     
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
@@ -665,6 +774,16 @@ router.post('/join-contest/:contest_id',joinContest)
  *       "status": "error",
  *       "message": "user is not exist"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.get('/do-contest/:contest_id',getQuestions)
 
@@ -677,8 +796,7 @@ router.get('/do-contest/:contest_id',getQuestions)
  * 
  * @apiDescription Get participant answers for grading   
  * 
- * @apiHeader {String} user_id User's unique ID.
- * @apiHeader {String} role User's role 
+ * @apiHeader {String} token authentication token.
  * @apiQuery {Number} contest_id Contest unique ID
  * @apiQuery {Number} contest_participant_id Participant who joining this contest unique ID
  * 
@@ -741,7 +859,9 @@ router.get('/do-contest/:contest_id',getQuestions)
  * @apiError NoPermission User have no permission(Only Corporation who hosted this contest)
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
- *     
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.    
+ * 
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
  *     {
@@ -758,6 +878,16 @@ router.get('/do-contest/:contest_id',getQuestions)
  *       "status": "error",
  *       "message": "user is not exist"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.get('/get-submitted/:contest_id/:contest_participant_id',getSubmitted)
 
@@ -770,8 +900,7 @@ router.get('/get-submitted/:contest_id/:contest_participant_id',getSubmitted)
  * 
  * @apiDescription Submitt answers or solution for the contest
  * 
- * @apiHeader {String} user_id User's unique ID.
- * @apiHeader {String} role User's role 
+ * @apiHeader {String} token authentication token.
  * @apiParams {Number} contest_id Contest unique ID
  * @apiParams {Object} answers JSON object with key is question_id and value is answer of that question
  * @apiParams {File} files Multiple file upon the question require file submit(Optional) 
@@ -791,7 +920,9 @@ router.get('/get-submitted/:contest_id/:contest_participant_id',getSubmitted)
  * @apiError Submitted User have submiited
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
- *     
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.     
+ *
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
  *     {
@@ -818,6 +949,16 @@ router.get('/get-submitted/:contest_id/:contest_participant_id',getSubmitted)
  *       "status": "error",
  *       "message": "user is not exist"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.post('/submission',uploadFiles, submitContest)
 
@@ -830,8 +971,7 @@ router.post('/submission',uploadFiles, submitContest)
  * 
  * @apiDescription Get data for participants's Your Contest Page
  * 
- * @apiHeader {String} user_id User's unique ID.
- * @apiHeader {String} role User's role 
+ * @apiHeader {String} token authentication token.
  * 
  *  
  * @apiSuccess {String} status Status of the operation.
@@ -868,7 +1008,9 @@ router.post('/submission',uploadFiles, submitContest)
  * @apiError NoPermission User have no permission(Only participants can do this)
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
- *     
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
+ * 
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
  *     {
@@ -885,6 +1027,16 @@ router.post('/submission',uploadFiles, submitContest)
  *       "status": "error",
  *       "message": "user is not exist"
  *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
+ *     }
  */
 router.get('/get-your-contest',getParticipantContest)
 
@@ -897,8 +1049,7 @@ router.get('/get-your-contest',getParticipantContest)
  * 
  * @apiDescription Grading/evaluating Participant answers
  * 
- * @apiHeader {String} user_id User's unique ID.
- * @apiHeader {String} role User's role 
+ * @apiHeader {String} token authentication token.
  * @apiParams {Number} contest_id Contest unique ID
  * @apiParams {Number} contest_participant_id Participant who joining this contest unique ID
  * @apiParams {Number} grade Grade of Participant
@@ -919,6 +1070,8 @@ router.get('/get-your-contest',getParticipantContest)
  * @apiError InvalidContestParticipant contest_participant_id is invalid
  * @apiError UserNotLoggedIn The user is not logged in.
  * @apiError UserNotExist The user does not exist.
+ * @apiError TokenExpired The token has expired.
+ * @apiError InvalidToken The token is invalid.
  *     
  * @apiErrorExample Error-Response:
  *     HTTP/1.1 400 Bad Request
@@ -945,6 +1098,16 @@ router.get('/get-your-contest',getParticipantContest)
  *     {
  *       "status": "error",
  *       "message": "user is not exist"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Token has expired"
+ *     }
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "status": "error",
+ *       "message": "Invalid token"
  *     }
  */
 router.post('/grading',grading)
