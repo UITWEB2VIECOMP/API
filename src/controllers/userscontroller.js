@@ -144,6 +144,10 @@ exports.uploadAvatar = async(req, res)=>{
         if (!req.file) {
             return res.status(400).json({ status: 'error', message: 'No file provided' });
         }
+        const file = {
+            type: req.file.mimetype,
+            buffer: req.file.buffer
+        }
         const [user] = await db.query('SELECT * FROM Users WHERE user_id = ?',[user_id])
         if(user[0].avatar !== 'https://firebasestorage.googleapis.com/v0/b/viecontest-e4a3c.appspot.com/o/avatar%2F76336a09-ca5d-4fbb-a294-d44e4cc54999?alt=media&token=4713c098-e832-4224-8657-d296bc658171'){
             await deleteImage(user[0].avatar,'avatar')
